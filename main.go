@@ -27,6 +27,7 @@ func main() {
     if err != nil {
         log.Error().Err(err).Msg("error in opening log file")
     }
+	defer file.Close()
 
     fileLogger := zerolog.New(file).With().Logger()
 	
