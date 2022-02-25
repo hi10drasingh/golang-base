@@ -2,11 +2,12 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 
 	"github.com/julienschmidt/httprouter"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
 
 func Index(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
@@ -18,19 +19,21 @@ func Hello(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 }
 
 func main() {
+	zerolog.SetGlobalLevel(zerolog.DebugLevel)
+	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
 
 	// If the file doesn't exist, create it or append to the file
     file, err := os.OpenFile("storage/logs/logs.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
     if err != nil {
-        log.Fatal(err)
+        log.Error().Err(err).Msg("error in opening log file")
     }
 
-    log.SetOutput(file)
+    fileLogger := zerolog.New(file).With().Logger()
 	
 	router := httprouter.New()
     router.GET("/", Index)
     router.GET("/hello/:name", Hello)
 
-    log.Println("Server started at port 8888 test")
-    log.Fatal(http.ListenAndServe(":8888", router))
+    fileLogger.Info().Msg("Server started at port 8888 testing")
+    fileLogger.Fatal().Err(http.ListenAndServe(":8888", router))
 }
