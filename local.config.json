@@ -1,0 +1,28 @@
+{
+    "env": "local",
+    "debug": "true",
+    "domain": "localhost",
+    "port": 8888,
+    "mysql": {
+        "host": "dev1.droom.in",
+        "port": 3306,
+        "db": "cscart_new",
+        "user": "root",
+        "pass": "profsnapeisdon"
+    },
+    "mongo": {
+        "host": "dev1.droom.in",
+        "port": 3306,
+        "db": "cscart_new",
+        "user": "root",
+        "pass": "profsnapeisdon"
+    },
+    "redis": {
+        "host": "dev1.droom.in",
+        "port": 3306,
+        "db": 0
+    },
+    "log": {
+        "dir": "internal/storage/logs"
+    }
+}
