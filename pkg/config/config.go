@@ -2,7 +2,6 @@ package config
 
 import (
 	"encoding/json"
-	"flag"
 	"os"
 )
 
@@ -33,25 +32,20 @@ type AppConfig struct {
 	Log LogConfig `json:"log"`
 }
 
-var env string = "local"
-
 var Config AppConfig
 
-func init() {
-	// Path to config file can be passed in.
-	flag.StringVar(&env, "env", env, "Environment")
-	flag.Parse()
-
+func Load(env string) (*AppConfig, error) {
 	configFile, err := os.Open(env + ".config.json")
 	if err != nil {
-		panic(err)
+		return &Config, err
 	}
 	defer configFile.Close()
 
 	jsonParser := json.NewDecoder(configFile)
 	err = jsonParser.Decode(&Config)
 	if err != nil {
-		panic(err)
+		return &Config, err
 	}
 
+	return &Config, nil
 }

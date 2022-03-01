@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/droomlab/drm-coupon/pkg/global"
+	"github.com/droomlab/drm-coupon/pkg/appcontext"
 	"github.com/julienschmidt/httprouter"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -23,19 +23,24 @@ var fileLogger zerolog.Logger
 
 func main() {
 
+	appContext, err := appcontext.InitilizeAppContext()
+	if err != nil {
+		panic(err)
+	}
+
 	zerolog.SetGlobalLevel(zerolog.DebugLevel)
 	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
 
 	// If the file doesn't exist, create it or append to the file
-	file, err := os.OpenFile(global.Global.Config.Log.Dir+"/error.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
+	file, err := os.OpenFile(appContext.Config.Log.Dir+"/error.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
 	if err != nil {
 		log.Error().Err(err).Msg("error in opening log file")
 	}
 	defer file.Close()
 
-	fileLogger := zerolog.New(file).With().Logger()
+	fileLogger = zerolog.New(file).With().Logger()
 
-	fmt.Print(global.Global)
+	fmt.Print(appContext)
 
 	router := httprouter.New()
 	router.GET("/", index)
