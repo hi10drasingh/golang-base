@@ -14,17 +14,17 @@ type DB struct {
 }
 
 type Logging struct {
-	Dir string `json:"dir"`
-	Level int `json:"level"`
+	Dir   string `json:"dir"`
+	Level int    `json:"level"`
 }
 
 type AppConfig struct {
-	Env    string   `json:"env"`
-	Debug  string   `json:"debug"`
-	Domain string   `json:"domian"`
-	Port   int      `json:"port"`
-	Mysql  DB `json:"mysql"`
-	Mongo  DB `json:"mongo"`
+	Env    string `json:"env"`
+	Debug  string `json:"debug"`
+	Domain string `json:"domian"`
+	Port   int    `json:"port"`
+	Mysql  DB     `json:"mysql"`
+	Mongo  DB     `json:"mongo"`
 	Redis  struct {
 		Host string `json:"host"`
 		Port int    `json:"port"`
