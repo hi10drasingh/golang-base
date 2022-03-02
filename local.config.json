@@ -23,6 +23,7 @@
         "db": 0
     },
     "log": {
-        "dir": "internal/storage/logs"
+        "dir": "internal/storage/logs",
+        "level": 0
     }
 }
