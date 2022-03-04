@@ -3,6 +3,8 @@ package config
 import (
 	"encoding/json"
 	"os"
+
+	"github.com/pkg/errors"
 )
 
 type DB struct {
@@ -33,19 +35,19 @@ type AppConfig struct {
 	Log Logging `json:"log"`
 }
 
-var Config AppConfig
-
 func Load(env string) (*AppConfig, error) {
+	var Config AppConfig
+
 	configFile, err := os.Open(env + ".config.json")
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Config File Open")
 	}
 	defer configFile.Close()
 
 	jsonParser := json.NewDecoder(configFile)
 	err = jsonParser.Decode(&Config)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Config File Decode")
 	}
 
 	return &Config, nil

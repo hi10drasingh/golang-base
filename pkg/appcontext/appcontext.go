@@ -5,10 +5,8 @@ import (
 
 	"github.com/droomlab/drm-coupon/pkg/config"
 	"github.com/droomlab/drm-coupon/pkg/logger"
+	"github.com/pkg/errors"
 )
-
-var appContext AppContext
-var err error
 
 type AppContext struct {
 	Config *config.AppConfig
@@ -21,12 +19,15 @@ func InitilizeAppContext() (*AppContext, error) {
 	flag.StringVar(&env, "env", env, "Environment")
 	flag.Parse()
 
-	appContext.Config, err = config.Load(env)
+	conf, err := config.Load(env)
 	if err != nil {
-		return &appContext, err
+		return nil, errors.Wrap(err, "Config Initialize")
 	}
 
-	appContext.Log, err = logger.NewZeroLogger(appContext.Config.Log)
+	log, err := logger.NewZeroLogger(conf.Log)
+	if err != nil {
+		return nil, errors.Wrap(err, "Log Initialize")
+	}
 
-	return &appContext, nil
+	return &AppContext{conf, log}, nil
 }

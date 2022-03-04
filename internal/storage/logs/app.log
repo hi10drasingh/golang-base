@@ -1,3 +1,4 @@
-{"level":"info","time":"2022-03-02T22:29:39+05:30","message":"Server started at port 8888"}
-{"level":"info","time":"2022-03-02T22:29:40+05:30","message":"Server started at port 8888"}
-{"level":"info","time":"2022-03-02T22:30:24+05:30","message":"Server started at port 8888"}
+{"level":"info","time":"2022-03-04T17:24:43+05:30","message":"Started listing at port 8888"}
+{"level":"info","caller":"/var/www/html/droom/drm-coupon/pkg/logger/zerolog.go:38","time":"2022-03-04T18:50:14+05:30","message":"Started listing at port 8888"}
+{"level":"info","caller":"/var/www/html/droom/drm-coupon/pkg/logger/zerolog.go:39","time":"2022-03-04T19:04:03+05:30","message":"Started listing at port 8888"}
+{"level":"info","caller":"/var/www/html/droom/drm-coupon/pkg/logger/zerolog.go:39","time":"2022-03-04T19:04:04+05:30","message":"Started listing at port 8888"}

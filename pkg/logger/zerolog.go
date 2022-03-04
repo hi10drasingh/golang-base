@@ -1,46 +1,49 @@
 package logger
 
 import (
+	"context"
 	"io"
 	"os"
 
 	"github.com/droomlab/drm-coupon/pkg/config"
+	"github.com/pkg/errors"
 	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/pkgerrors"
 )
 
 type log struct {
 	Logger *zerolog.Logger
 }
 
-func (l *log) Errorf(err error, msg string, args ...interface{}) {
-	l.Logger.Error().Stack().Err(err).Msgf(msg, args...)
+func (l *log) Errorf(ctx context.Context, err error, format string, args ...interface{}) {
+	l.Logger.Error().Stack().Err(err).Msgf(format, args...)
 }
 
-func (l *log) Error(err error, msg string) {
+func (l *log) Error(ctx context.Context, err error, msg string) {
 	l.Logger.Error().Stack().Err(err).Msgf(msg)
 }
 
-func (l *log) Fatalf(err error, msg string, args ...interface{}) {
-	l.Logger.Fatal().Stack().Err(err).Msgf(msg, args...)
+func (l *log) Fatalf(ctx context.Context, err error, format string, args ...interface{}) {
+	l.Logger.Fatal().Stack().Err(err).Msgf(format, args...)
 }
 
-func (l *log) Fatal(err error, msg string) {
+func (l *log) Fatal(ctx context.Context, err error, msg string) {
 	l.Logger.Error().Stack().Err(err).Msg(msg)
 }
 
-func (l *log) Infof(msg string, args ...interface{}) {
-	l.Logger.Info().Msgf(msg, args...)
+func (l *log) Infof(ctx context.Context, format string, args ...interface{}) {
+	l.Logger.Info().Msgf(format, args...)
 }
 
-func (l *log) Info(msg string) {
+func (l *log) Info(ctx context.Context, msg string) {
 	l.Logger.Info().Msg(msg)
 }
 
-func (l *log) Debugf(msg string, args ...interface{}) {
-	l.Logger.Debug().Msgf(msg, args...)
+func (l *log) Debugf(ctx context.Context, format string, args ...interface{}) {
+	l.Logger.Debug().Msgf(format, args...)
 }
 
-func (l *log) Debug(msg string) {
+func (l *log) Debug(ctx context.Context, msg string) {
 	l.Logger.Debug().Msgf(msg)
 }
 
@@ -58,19 +61,22 @@ func (lw *LevelWriter) WriteLevel(l zerolog.Level, p []byte) (n int, err error) 
 }
 
 func NewZeroLogger(conf config.Logging) (Logger, error) {
+	zerolog.ErrorStackMarshaler = pkgerrors.MarshalStack
+	zerolog.SetGlobalLevel(zerolog.Level(conf.Level))
+
 	defaultWriter, err := os.OpenFile(conf.Dir+"/app.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "App Log File Open")
 	}
 
 	errorWriter, err := os.OpenFile(conf.Dir+"/error.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Error Log File Open")
 	}
 
 	levelWriter := LevelWriter{defaultWriter, errorWriter}
 
-	logWriter := zerolog.New(levelWriter).With().Timestamp().Logger()
+	logWriter := zerolog.New(&levelWriter).With().Caller().Timestamp().Logger()
 
 	return &log{&logWriter}, nil
 }

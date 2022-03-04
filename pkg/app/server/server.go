@@ -1,26 +1,45 @@
 package server
 
 import (
+	"context"
+	"fmt"
+	"net"
 	"net/http"
 
+	"github.com/droomlab/drm-coupon/pkg/app/routes"
 	"github.com/droomlab/drm-coupon/pkg/appcontext"
 	"github.com/julienschmidt/httprouter"
+	"github.com/pkg/errors"
 )
 
-type server struct {
+type Server struct {
 	appCtx *appcontext.AppContext
+	router *httprouter.Router
 }
 
-func Serve() {
+func NewServer() (*Server, error) {
 	appContext, err := appcontext.InitilizeAppContext()
 	if err != nil {
-		panic(err)
+		return nil, errors.Wrap(err, "AppCtx Setup Error")
 	}
 
-	router := httprouter.New()
-	router.GET("/", index)
-	router.GET("/hello/:name", hello)
+	router := routes.Register()
 
-	appContext.Log.Info("Server started at port 8888")
-	appContext.Log.Fatal(http.ListenAndServe(":8888", router), "Server Failure")
+	s := &Server{appContext, router}
+
+	return s, nil
+}
+
+func (s *Server) Serve() error {
+	port := fmt.Sprintf("%v", s.appCtx.Config.Port)
+
+	l, err := net.Listen("tcp", "localhost:"+port)
+
+	if err != nil {
+		return err
+	}
+
+	s.appCtx.Log.Info(context.TODO(), "Started listing at port "+port)
+
+	return http.Serve(l, s.router)
 }
