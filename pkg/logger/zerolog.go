@@ -5,7 +5,6 @@ import (
 	"io"
 	"os"
 
-	"github.com/droomlab/drm-coupon/pkg/config"
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/pkgerrors"
@@ -60,7 +59,7 @@ func (lw *LevelWriter) WriteLevel(l zerolog.Level, p []byte) (n int, err error) 
 	return w.Write(p)
 }
 
-func NewZeroLogger(conf config.Logging) (Logger, error) {
+func NewZeroLogger(conf LogConfig) (Logger, error) {
 	zerolog.ErrorStackMarshaler = pkgerrors.MarshalStack
 	zerolog.SetGlobalLevel(zerolog.Level(conf.Level))
 

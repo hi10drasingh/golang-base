@@ -1,8 +1,13 @@
 {
     "env": "local",
     "debug": "true",
-    "domain": "localhost",
-    "port": 8888,
+    "http": {
+        "port": 8888,
+        "readTimeout": "10s",
+        "writeTimeout": "10s",
+        "idleTimeout": "10s",
+        "maxHeaderMegaBytes": 1
+    },
     "mysql": {
         "host": "dev1.droom.in",
         "port": 3306,
@@ -17,13 +22,8 @@
         "user": "root",
         "pass": "profsnapeisdon"
     },
-    "redis": {
-        "host": "dev1.droom.in",
-        "port": 3306,
-        "db": 0
-    },
     "log": {
-        "dir": "internal/storage/logs",
+        "dir": "storage/logs",
         "level": 0
     }
 }

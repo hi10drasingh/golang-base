@@ -2,7 +2,10 @@ package logger
 
 import "context"
 
-var Log Logger
+type LogConfig struct {
+	Dir   string `json:"dir"`
+	Level int    `json:"level"`
+}
 
 type Logger interface {
 	Errorf(ctx context.Context, err error, format string, args ...interface{})

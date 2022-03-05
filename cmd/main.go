@@ -4,24 +4,14 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/droomlab/drm-coupon/pkg/app/server"
-	"github.com/pkg/errors"
+	"github.com/droomlab/drm-coupon/internal/app"
 )
 
 func main() {
-	if err := run(); err != nil {
+	var configDir string = "config"
+	if err := app.Run(configDir); err != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", err)
 		os.Exit(1)
 	}
 }
 
-func run() error {
-	s, err := server.NewServer()
-
-	if err != nil {
-		return errors.Wrap(err, "Server Create")
-	}
-
-	return s.Serve()
-
-}
