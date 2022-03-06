@@ -18,9 +18,9 @@ func allowMethod(h http.HandlerFunc, method string) http.HandlerFunc {
 }
 
 func get(h http.HandlerFunc) http.HandlerFunc {
-	return allowMethod(h, "GET")
+	return allowMethod(h, http.MethodGet)
 }
 
 func post(h http.HandlerFunc) http.HandlerFunc {
-	return allowMethod(h, "POST")
+	return allowMethod(h, http.MethodPost)
 }
