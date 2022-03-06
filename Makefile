@@ -9,4 +9,3 @@ lint:
 
 watch:
 	~/go/bin/reflex -s -r '\.go$$' make run
-

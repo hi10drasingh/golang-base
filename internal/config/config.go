@@ -3,6 +3,7 @@ package config
 import (
 	"encoding/json"
 	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/droomlab/drm-coupon/pkg/logger"
@@ -10,8 +11,10 @@ import (
 )
 
 type (
-	CustomTime time.Duration
-	AppConfig  struct {
+	customTime time.Duration
+
+	// AppConfig holds application level configuration
+	AppConfig struct {
 		Env   string           `json:"env"`
 		Debug string           `json:"debug"`
 		HTTP  HTTPConfig       `json:"http"`
@@ -20,6 +23,7 @@ type (
 		Log   logger.LogConfig `json:"log"`
 	}
 
+	// DBConfig holds configuration for Database server
 	DBConfig struct {
 		Host string `json:"host"`
 		Port int    `json:"port"`
@@ -28,17 +32,19 @@ type (
 		Pass string `json:"pass,omitempty"`
 	}
 
+	// HTTPConfig holds configuration for HTTP server
 	HTTPConfig struct {
 		Host               string     `json:"host"`
 		Port               int        `json:"port"`
-		ReadTimeout        CustomTime `json:"readTimeout"`
-		WriteTimeout       CustomTime `json:"writeTimeout"`
-		IdleTimeout        CustomTime `json:"idleTimeout"`
+		ReadTimeout        customTime `json:"readTimeout"`
+		WriteTimeout       customTime `json:"writeTimeout"`
+		IdleTimeout        customTime `json:"idleTimeout"`
 		MaxHeaderMegabytes int        `json:"maxHeaderMegaBytes"`
 	}
 )
 
-func (c *CustomTime) UnmarshalJSON(data []byte) (err error) {
+// Custom unmarshaling for timr in string
+func (c *customTime) UnmarshalJSON(data []byte) (err error) {
 	var tmp string
 
 	if err = json.Unmarshal(data, &tmp); err != nil {
@@ -47,26 +53,31 @@ func (c *CustomTime) UnmarshalJSON(data []byte) (err error) {
 
 	time, err := time.ParseDuration(tmp)
 
-	*c = CustomTime(time)
+	*c = customTime(time)
 
 	return err
 }
 
-func Load(dir string, env string) (*AppConfig, error) {
-	var Config AppConfig
-
-	configFile, err := os.Open(dir + "/" + env + ".config.json")
+// Load func loads configuration from *.config.json
+func Load(dir string, env string) (config *AppConfig, err error) {
+	configFile, err := os.Open(filepath.Join(filepath.Clean(dir), filepath.Clean(env), ".config.json"))
 	if err != nil {
-		return nil, errors.Wrap(err, "Config File Open")
+		err = errors.Wrap(err, "Config File Open")
 	}
-	defer configFile.Close()
+
+	defer func() {
+		cerr := configFile.Close()
+		if err == nil {
+			err = cerr
+		}
+	}()
 
 	jsonParser := json.NewDecoder(configFile)
-	err = jsonParser.Decode(&Config)
+	err = jsonParser.Decode(&config)
 
 	if err != nil {
-		return nil, errors.Wrap(err, "Config File Decode")
+		err = errors.Wrap(err, "Config File Decode")
 	}
 
-	return &Config, nil
+	return
 }

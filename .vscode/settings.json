@@ -1,8 +1,26 @@
 {
     "go.formatTool": "goimports",
     "go.formatFlags": [
-        "-ed",
-        "-s"
+        "-s",
+        "-w",
+        "-e"
     ],
-    "go.lintTool": "golangci-lint"
+    "go.useLanguageServer": true,
+    "[go]": {
+        "editor.defaultFormatter": "golang.go",
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": true,
+        }
+    },
+    "go.docsTool": "gogetdoc",
+    "go.autocompleteUnimportedPackages": true,
+    "go.lintTool": "golangci-lint",
+    "go.lintOnSave": "file",
+    "go.lintFlags": [
+        "--fast"
+    ],
+    "go.buildOnSave": "workspace",
+    "go.toolsManagement.autoUpdate": true,
+    "go.installDependenciesWhenBuilding": true,
 }

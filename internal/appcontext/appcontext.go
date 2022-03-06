@@ -6,15 +6,18 @@ import (
 	"github.com/pkg/errors"
 )
 
+// AppContext contains all server level dependencies
 type AppContext struct {
 	Config *config.AppConfig
 	Log    logger.Logger
 }
 
+// Close used to free memory allocations of dependencies
 func (ctx AppContext) Close() {
 
 }
 
+// InitilizeAppContext initializes server level dependencies
 func InitilizeAppContext(configDir string, env string) (*AppContext, error) {
 	conf, err := config.Load(configDir, env)
 	if err != nil {

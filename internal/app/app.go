@@ -13,6 +13,7 @@ import (
 	"github.com/droomlab/drm-coupon/internal/transport/rest"
 )
 
+// Run the http server
 func Run(configDir string) error {
 
 	var env string = "local"
@@ -30,7 +31,7 @@ func Run(configDir string) error {
 
 	server := h.GetServer()
 
-	//channel to listen for errors coming from the listener.
+	// channel to listen for errors coming from the listener.
 	serverErrors := make(chan error, 1)
 
 	go func() {
@@ -38,11 +39,11 @@ func Run(configDir string) error {
 		serverErrors <- server.ListenAndServe()
 	}()
 
-	//channel to listen for an interrupt or terminate signal from the OS.
+	// channel to listen for an interrupt or terminate signal from the OS.
 	shutdown := make(chan os.Signal, 1)
 	signal.Notify(shutdown, os.Interrupt, syscall.SIGTERM)
 
-	//blocking run and waiting for shutdown.
+	// blocking run and waiting for shutdown.
 	select {
 	case err := <-serverErrors:
 		return fmt.Errorf("error: starting server: %s", err)
@@ -50,7 +51,7 @@ func Run(configDir string) error {
 	case <-shutdown:
 		h.AppCtx.Log.Info("app : Start shutdown")
 
-		//give outstanding requests a deadline for completion.
+		// give outstanding requests a deadline for completion.
 		const timeout = 5 * time.Second
 		ctx, cancel := context.WithTimeout(context.Background(), timeout)
 		defer cancel()

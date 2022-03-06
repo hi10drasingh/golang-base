@@ -45,12 +45,12 @@ func (l *log) Debug(msg string) {
 	l.Logger.Debug().Msgf(msg)
 }
 
-type LevelWriter struct {
+type levelWriter struct {
 	io.Writer
 	ErrorWriter io.Writer
 }
 
-func (lw *LevelWriter) WriteLevel(l zerolog.Level, p []byte) (n int, err error) {
+func (lw *levelWriter) WriteLevel(l zerolog.Level, p []byte) (n int, err error) {
 	w := lw.Writer
 	if l > zerolog.InfoLevel {
 		w = lw.ErrorWriter
@@ -58,23 +58,24 @@ func (lw *LevelWriter) WriteLevel(l zerolog.Level, p []byte) (n int, err error) 
 	return w.Write(p)
 }
 
+// NewZeroLogger returns a new instance of zerologger
 func NewZeroLogger(conf LogConfig) (Logger, error) {
 	zerolog.ErrorStackMarshaler = pkgerrors.MarshalStack
 	zerolog.SetGlobalLevel(zerolog.Level(conf.Level))
 
-	defaultWriter, err := os.OpenFile(conf.Dir+"/app.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
+	defaultWriter, err := os.OpenFile(conf.Dir+"/app.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
 	if err != nil {
 		return nil, errors.Wrap(err, "App Log File Open")
 	}
 
-	errorWriter, err := os.OpenFile(conf.Dir+"/error.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
+	errorWriter, err := os.OpenFile(conf.Dir+"/error.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
 	if err != nil {
 		return nil, errors.Wrap(err, "Error Log File Open")
 	}
 
-	levelWriter := LevelWriter{defaultWriter, errorWriter}
+	lvlWriter := levelWriter{defaultWriter, errorWriter}
 
-	logWriter := zerolog.New(&levelWriter).With().Caller().Timestamp().Logger()
+	logWriter := zerolog.New(&lvlWriter).With().Caller().Timestamp().Logger()
 
 	return &log{&logWriter}, nil
 }
