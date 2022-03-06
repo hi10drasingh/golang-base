@@ -15,7 +15,7 @@ func (ctx AppContext) Close() {
 
 }
 
-func InitilizeAppContext(configDir string , env string) (*AppContext, error) {
+func InitilizeAppContext(configDir string, env string) (*AppContext, error) {
 	conf, err := config.Load(configDir, env)
 	if err != nil {
 		return nil, errors.Wrap(err, "Config Initialize")

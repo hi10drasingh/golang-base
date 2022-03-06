@@ -9,14 +9,15 @@ import (
 	"github.com/pkg/errors"
 )
 
-type(
-	AppConfig struct {
-		Env    string `json:"env"`
-		Debug  string `json:"debug"`
-		HTTP HTTPConfig `json:"http"`
-		Mysql  DBConfig     `json:"mysql"`
-		Mongo  DBConfig     `json:"mongo"`
-		Log logger.LogConfig `json:"log"`
+type (
+	CustomTime time.Duration
+	AppConfig  struct {
+		Env   string           `json:"env"`
+		Debug string           `json:"debug"`
+		HTTP  HTTPConfig       `json:"http"`
+		Mysql DBConfig         `json:"mysql"`
+		Mongo DBConfig         `json:"mongo"`
+		Log   logger.LogConfig `json:"log"`
 	}
 
 	DBConfig struct {
@@ -28,14 +29,28 @@ type(
 	}
 
 	HTTPConfig struct {
-		Host string `json:"host"`
-		Port int `json:"port"`
-		ReadTimeout time.Duration `json:"readTimeout"`
-		WriteTimeout time.Duration `json:"writeTimeout"`
-		IdleTimeout time.Duration `json:"idleTimeout"`
-		MaxHeaderMegabytes int `json:"maxHeaderMegaBytes"`
+		Host               string     `json:"host"`
+		Port               int        `json:"port"`
+		ReadTimeout        CustomTime `json:"readTimeout"`
+		WriteTimeout       CustomTime `json:"writeTimeout"`
+		IdleTimeout        CustomTime `json:"idleTimeout"`
+		MaxHeaderMegabytes int        `json:"maxHeaderMegaBytes"`
 	}
 )
+
+func (c *CustomTime) UnmarshalJSON(data []byte) (err error) {
+	var tmp string
+
+	if err = json.Unmarshal(data, &tmp); err != nil {
+		return err
+	}
+
+	time, err := time.ParseDuration(tmp)
+
+	*c = CustomTime(time)
+
+	return err
+}
 
 func Load(dir string, env string) (*AppConfig, error) {
 	var Config AppConfig

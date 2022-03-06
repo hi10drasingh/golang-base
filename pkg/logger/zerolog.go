@@ -1,7 +1,6 @@
 package logger
 
 import (
-	"context"
 	"io"
 	"os"
 
@@ -14,35 +13,35 @@ type log struct {
 	Logger *zerolog.Logger
 }
 
-func (l *log) Errorf(ctx context.Context, err error, format string, args ...interface{}) {
+func (l *log) Errorf(err error, format string, args ...interface{}) {
 	l.Logger.Error().Stack().Err(err).Msgf(format, args...)
 }
 
-func (l *log) Error(ctx context.Context, err error, msg string) {
+func (l *log) Error(err error, msg string) {
 	l.Logger.Error().Stack().Err(err).Msgf(msg)
 }
 
-func (l *log) Fatalf(ctx context.Context, err error, format string, args ...interface{}) {
+func (l *log) Fatalf(err error, format string, args ...interface{}) {
 	l.Logger.Fatal().Stack().Err(err).Msgf(format, args...)
 }
 
-func (l *log) Fatal(ctx context.Context, err error, msg string) {
+func (l *log) Fatal(err error, msg string) {
 	l.Logger.Error().Stack().Err(err).Msg(msg)
 }
 
-func (l *log) Infof(ctx context.Context, format string, args ...interface{}) {
+func (l *log) Infof(format string, args ...interface{}) {
 	l.Logger.Info().Msgf(format, args...)
 }
 
-func (l *log) Info(ctx context.Context, msg string) {
+func (l *log) Info(msg string) {
 	l.Logger.Info().Msg(msg)
 }
 
-func (l *log) Debugf(ctx context.Context, format string, args ...interface{}) {
+func (l *log) Debugf(format string, args ...interface{}) {
 	l.Logger.Debug().Msgf(format, args...)
 }
 
-func (l *log) Debug(ctx context.Context, msg string) {
+func (l *log) Debug(msg string) {
 	l.Logger.Debug().Msgf(msg)
 }
 
