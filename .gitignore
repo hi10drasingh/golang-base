@@ -18,3 +18,4 @@ bin
 tmp
 logs.txt
 *.sum
+*.log
