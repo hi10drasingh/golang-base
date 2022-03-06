@@ -39,11 +39,3 @@ func (h *Handlers) GetServer() *http.Server {
 
 	return &server
 }
-
-// global middleware setup
-func (h *Handlers) setUpGlobalMiddlewares(handler http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		final := h.panicRecovery(h.logger(h.cors(handler.ServeHTTP)))
-		final(w, r)
-	})
-}

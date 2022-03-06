@@ -33,7 +33,7 @@ func (h *Handlers) cors(han http.HandlerFunc) http.HandlerFunc {
 }
 
 func (h *Handlers) panicRecovery(han http.HandlerFunc) http.HandlerFunc {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
 			if r := recover(); r != nil {
 				http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -54,5 +54,13 @@ func (h *Handlers) panicRecovery(han http.HandlerFunc) http.HandlerFunc {
 			}
 		}()
 		han(w, r)
+	}
+}
+
+// global middleware setup
+func (h *Handlers) setUpGlobalMiddlewares(handler http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		final := h.panicRecovery(h.logger(h.cors(handler.ServeHTTP)))
+		final(w, r)
 	})
 }
