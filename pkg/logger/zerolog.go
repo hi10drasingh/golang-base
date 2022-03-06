@@ -75,7 +75,7 @@ func NewZeroLogger(conf LogConfig) (Logger, error) {
 
 	lvlWriter := levelWriter{defaultWriter, errorWriter}
 
-	logWriter := zerolog.New(&lvlWriter).With().Caller().Timestamp().Logger()
+	logWriter := zerolog.New(&lvlWriter).With().CallerWithSkipFrameCount(zerolog.CallerSkipFrameCount + 1).Timestamp().Logger()
 
 	return &log{&logWriter}, nil
 }

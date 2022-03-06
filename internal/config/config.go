@@ -59,10 +59,12 @@ func (c *customTime) UnmarshalJSON(data []byte) (err error) {
 }
 
 // Load func loads configuration from *.config.json
-func Load(dir string, env string) (config *AppConfig, err error) {
-	configFile, err := os.Open(filepath.Join(filepath.Clean(dir), filepath.Clean(env), ".config.json"))
+func Load(dir string, env string) (*AppConfig, error) {
+	var config *AppConfig
+
+	configFile, err := os.Open(filepath.Join(filepath.Clean(dir), filepath.Clean(env)+".config.json"))
 	if err != nil {
-		err = errors.Wrap(err, "Config File Open")
+		return config, errors.Wrap(err, "Config File Open")
 	}
 
 	defer func() {
@@ -76,8 +78,8 @@ func Load(dir string, env string) (config *AppConfig, err error) {
 	err = jsonParser.Decode(&config)
 
 	if err != nil {
-		err = errors.Wrap(err, "Config File Decode")
+		return config, errors.Wrap(err, "Config File Decode")
 	}
 
-	return
+	return config, err
 }

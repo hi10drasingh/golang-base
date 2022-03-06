@@ -35,7 +35,7 @@ func Run(configDir string) error {
 	serverErrors := make(chan error, 1)
 
 	go func() {
-		h.AppCtx.Log.Infof("app : API listening on %s", h.AppCtx.Config.HTTP.Port)
+		h.AppCtx.Log.Infof("app : API listening on port %v", h.AppCtx.Config.HTTP.Port)
 		serverErrors <- server.ListenAndServe()
 	}()
 
