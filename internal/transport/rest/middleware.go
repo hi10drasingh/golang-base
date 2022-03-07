@@ -55,7 +55,7 @@ func (h *Handlers) panicRecovery(han drmHandler) drmHandler {
 
 func (h *Handlers) errorHandler(han drmHandler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		err := han(w, r) // Call handler function
+		var err error = han(w, r) // Call handler function
 		if err == nil {
 			return
 		}
