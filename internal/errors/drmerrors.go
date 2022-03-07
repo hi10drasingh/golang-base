@@ -1,11 +1,31 @@
-package httperr
+package drmerrors
 
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
 )
 
-// HTTPError implements ClientError interface.
+// ClientError is an error whose details to be shared with client.
+type ClientError interface {
+	// Error returns message attached with error
+	Error() string
+	// ErrorObj return actual error obj
+	ErrorObj() error
+	// ResponseBody returns response body.
+	ResponseBody() ([]byte, error)
+	// ResponseHeaders returns http status code and headers.
+	ResponseHeaders() (int, map[string]string)
+}
+
+var (
+	// MethodNotAllowed 405 Method Not Allowed
+	MethodNotAllowed string = http.StatusText(http.StatusMethodNotAllowed)
+	// InternalServerError 500 Internal Server Error
+	InternalServerError string = http.StatusText(http.StatusInternalServerError)
+)
+
+// HTTPError Contains Error , Message , Code And Status
 type HTTPError struct {
 	Cause   error  `json:"-"`
 	Code    string `json:"code"`
@@ -13,11 +33,17 @@ type HTTPError struct {
 	Status  int    `json:"statusCode"`
 }
 
+// Error returns message attached with error
 func (e *HTTPError) Error() string {
 	if e.Cause == nil {
 		return e.Message
 	}
 	return e.Message + " : " + e.Cause.Error()
+}
+
+// ErrorObj return actual error obj
+func (e *HTTPError) ErrorObj() error {
+	return e.Cause
 }
 
 // ResponseBody returns JSON response body.

@@ -2,25 +2,23 @@ package rest
 
 import "net/http"
 
-func (h *Handlers) setupRoutes(router *http.ServeMux) {
-	router.HandleFunc("/hello", get(h.hello()))
-	router.HandleFunc("/post", post(h.hello()))
-}
-
-func allowMethod(h http.HandlerFunc, method string) http.HandlerFunc {
+// globalMiddleware setup
+func (h *Handlers) globalMiddlewares(method string, handler drmHandler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if method != r.Method {
-			http.Error(w, "405 method not allowed", http.StatusMethodNotAllowed)
-			return
+		var final http.HandlerFunc
+
+		switch method {
+		case http.MethodGet:
+			final = h.errorHandler(h.get(h.panicRecovery(h.logger(h.cors(handler)))))
+		case http.MethodPost:
+			final = h.errorHandler(h.post(h.panicRecovery(h.logger(h.cors(handler)))))
 		}
-		h(w, r)
+
+		final(w, r)
 	}
 }
 
-func get(h http.HandlerFunc) http.HandlerFunc {
-	return allowMethod(h, http.MethodGet)
-}
-
-func post(h http.HandlerFunc) http.HandlerFunc {
-	return allowMethod(h, http.MethodPost)
+func (h *Handlers) setupRoutes(router *http.ServeMux) {
+	router.Handle("/hello", h.globalMiddlewares(http.MethodGet, h.hello()))
+	router.Handle("/post", h.globalMiddlewares(http.MethodPost, h.hello()))
 }
