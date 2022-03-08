@@ -4,21 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"time"
-
-	"github.com/droomlab/drm-coupon/pkg/appcontext"
 )
-
-// Handlers Struct is responsible for server creation and registration of route-handlers mapping
-type Handlers struct {
-	AppCtx *appcontext.AppContext
-}
-
-// NewHandlers returns new instance of Handles Struct
-func NewHandlers(appCtx *appcontext.AppContext) *Handlers {
-	return &Handlers{
-		AppCtx: appCtx,
-	}
-}
 
 // GetServer creates new instance of HTTP server
 func (h *Handlers) GetServer() *http.Server {

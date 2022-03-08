@@ -6,7 +6,9 @@ import (
 	"strings"
 	"time"
 
-	drmerrors "github.com/droomlab/drm-coupon/pkg/errors"
+	clienterr "github.com/droomlab/drm-coupon/pkg/errors"
+
+	httperr "github.com/droomlab/drm-coupon/pkg/errors/http"
 )
 
 func (h *Handlers) logger(han drmHandler) drmHandler {
@@ -56,7 +58,7 @@ func (h *Handlers) panicRecovery(han drmHandler) drmHandler {
 func (h *Handlers) checkMethod(dh drmHandler, method string) drmHandler {
 	return func(w http.ResponseWriter, r *http.Request) error {
 		if method != r.Method {
-			return drmerrors.NewHTTPError(errors.New("failedcnkcn"), http.StatusMethodNotAllowed, drmerrors.MethodNotAllowed)
+			return httperr.NewError(nil, http.StatusMethodNotAllowed, httperr.MethodNotAllowed)
 		}
 		return dh(w, r)
 	}
@@ -78,7 +80,7 @@ func (h *Handlers) errorHandler(han drmHandler) http.HandlerFunc {
 		}
 
 		// Check if it is a ClientError.
-		clientError, ok := err.(drmerrors.ClientError)
+		clientError, ok := err.(clienterr.ClientError)
 
 		if !ok {
 			h.AppCtx.Log.Error(err, "Server Error")
