@@ -2,71 +2,75 @@ package app
 
 import (
 	"context"
-	"flag"
-	"fmt"
+	"net/http"
 	"os"
-	"os/signal"
 	"syscall"
 	"time"
 
-	"github.com/droomlab/drm-coupon/pkg/appcontext"
-	"github.com/droomlab/drm-coupon/pkg/http/rest"
+	"github.com/droomlab/drm-coupon/pkg/config"
+	"github.com/droomlab/drm-coupon/pkg/drmlog"
 )
 
-// Run the http server
-func Run(configDir string) error {
+// Handler type defines type of request handlers
+type Handler func(ctx context.Context, w http.ResponseWriter, r *http.Request) error
 
-	var env string = "local"
-	// Path to config file can be passed in.
-	flag.StringVar(&env, "env", env, "Environment")
-	flag.Parse()
+// App struct hold application level dependencies
+type App struct {
+	router   *http.ServeMux
+	shutdown chan os.Signal
+	log      drmlog.Logger
+	config   *config.App
+	mw       []Middleware
+}
 
-	AppCtx, err := appcontext.InitilizeAppContext(configDir, env)
-	if err != nil {
-		return err
+// NewApp returns new instance of App
+func NewApp(shutdown chan os.Signal, log drmlog.Logger, config *config.App, mw ...Middleware) *App {
+	router := http.NewServeMux()
+
+	return &App{
+		router:   router,
+		shutdown: shutdown,
+		log:      log,
+		config:   config,
+		mw:       mw,
 	}
-	defer AppCtx.Close()
+}
 
-	h := rest.NewHandlers(AppCtx)
+// SignalShutdown used to gracefully shutdown app
+func (a *App) SignalShutdown() {
+	a.shutdown <- syscall.SIGTERM
+}
 
-	server := h.GetServer()
+// ServeHTTP used to make app a valid http.Handler
+func (a *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	a.router.ServeHTTP(w, r)
+}
 
-	// channel to listen for errors coming from the listener.
-	serverErrors := make(chan error, 1)
+// Handle used to register new routes
+func (a *App) Handle(group string, path string, handler Handler, mw ...Middleware) {
+	handler = wrapMiddleware(mw, handler)
 
-	go func() {
-		h.AppCtx.Log.Infof("app : API listening on port %v", h.AppCtx.Config.HTTP.Port)
-		serverErrors <- server.ListenAndServe()
-	}()
+	handler = wrapMiddleware(a.mw, handler)
 
-	// channel to listen for an interrupt or terminate signal from the OS.
-	shutdown := make(chan os.Signal, 1)
-	signal.Notify(shutdown, os.Interrupt, syscall.SIGTERM)
+	h := func(w http.ResponseWriter, r *http.Request) {
 
-	// blocking run and waiting for shutdown.
-	select {
-	case err := <-serverErrors:
-		return fmt.Errorf("error: starting server: %s", err)
+		ctx := r.Context()
 
-	case sig := <-shutdown:
-		h.AppCtx.Log.Infof("app : Start shutdown | signal : %v", sig)
-
-		// give outstanding requests a deadline for completion.
-		timeout := time.Duration(h.AppCtx.Config.HTTP.ShutdownTimeout)
-		ctx, cancel := context.WithTimeout(context.Background(), timeout)
-		defer cancel()
-
-		// asking listener to shutdown
-		err := server.Shutdown(ctx)
-		if err != nil {
-			h.AppCtx.Log.Infof("app : Graceful shutdown did not complete in %v : %v", timeout, err)
-			err = server.Close()
+		v := Values{
+			Now: time.Now().UTC(),
 		}
 
-		if err != nil {
-			return fmt.Errorf("app : could not stop server gracefully : %v", err)
+		ctx = context.WithValue(ctx, ctxkey, &v)
+
+		if err := handler(ctx, w, r); err != nil {
+			a.SignalShutdown()
+			return
 		}
 	}
 
-	return nil
+	finalPath := path
+	if group != "" {
+		finalPath = "/" + group + path
+	}
+	a.router.HandleFunc(finalPath, h)
 }

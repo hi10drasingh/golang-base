@@ -2,12 +2,15 @@ package config
 
 import (
 	"encoding/json"
+	"flag"
 	"os"
 	"path/filepath"
 	"time"
 
 	"github.com/pkg/errors"
 )
+
+const directory string = "config"
 
 type (
 	customTime time.Duration
@@ -65,10 +68,15 @@ func (c *customTime) UnmarshalJSON(data []byte) (err error) {
 }
 
 // Load func loads configuration from *.config.json
-func Load(dir string, env string) (*App, error) {
+func Load() (*App, error) {
+	var env string = "local"
+	// Path to config file can be passed in.
+	flag.StringVar(&env, "env", env, "Environment")
+	flag.Parse()
+
 	var config *App
 
-	configFile, err := os.Open(filepath.Join(filepath.Clean(dir), filepath.Clean(env)+".config.json"))
+	configFile, err := os.Open(filepath.Join(filepath.Clean(directory), filepath.Clean(env)+".config.json"))
 	if err != nil {
 		return config, errors.Wrap(err, "Config File Open")
 	}
