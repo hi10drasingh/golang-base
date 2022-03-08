@@ -48,11 +48,11 @@ func Run(configDir string) error {
 	case err := <-serverErrors:
 		return fmt.Errorf("error: starting server: %s", err)
 
-	case <-shutdown:
-		h.AppCtx.Log.Info("app : Start shutdown")
+	case sig := <-shutdown:
+		h.AppCtx.Log.Infof("app : Start shutdown | signal : %v", sig)
 
 		// give outstanding requests a deadline for completion.
-		const timeout = 5 * time.Second
+		timeout := time.Duration(h.AppCtx.Config.HTTP.ShutdownTimeout)
 		ctx, cancel := context.WithTimeout(context.Background(), timeout)
 		defer cancel()
 

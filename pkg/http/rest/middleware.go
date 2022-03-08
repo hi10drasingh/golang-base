@@ -58,7 +58,7 @@ func (h *Handlers) panicRecovery(han drmHandler) drmHandler {
 func (h *Handlers) checkMethod(dh drmHandler, method string) drmHandler {
 	return func(w http.ResponseWriter, r *http.Request) error {
 		if method != r.Method {
-			return resterr.NewError(nil, http.StatusMethodNotAllowed, resterr.MethodNotAllowed)
+			return resterr.NewError(errors.New("testing error method"), http.StatusMethodNotAllowed, resterr.MethodNotAllowed)
 		}
 		return dh(w, r)
 	}

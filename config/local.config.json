@@ -3,9 +3,10 @@
     "debug": "true",
     "http": {
         "port": 8888,
-        "readTimeout": "10s",
+        "readTimeout": "5s",
         "writeTimeout": "10s",
-        "idleTimeout": "10s",
+        "idleTimeout": "120s",
+        "shutdownTimeout": "20s",
         "maxHeaderMegaBytes": 1
     },
     "mysql": {

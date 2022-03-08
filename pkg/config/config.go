@@ -38,6 +38,7 @@ type (
 		ReadTimeout        customTime `json:"readTimeout"`
 		WriteTimeout       customTime `json:"writeTimeout"`
 		IdleTimeout        customTime `json:"idleTimeout"`
+		ShutdownTimeout    customTime `json:"shutdownTimeout"`
 		MaxHeaderMegabytes int        `json:"maxHeaderMegaBytes"`
 	}
 

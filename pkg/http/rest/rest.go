@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/http"
 	"time"
+
+	"github.com/droomlab/drm-coupon/pkg/logger"
 )
 
 // GetServer creates new instance of HTTP server
@@ -19,6 +21,7 @@ func (h *Handlers) GetServer() *http.Server {
 		WriteTimeout:   time.Duration(h.AppCtx.Config.HTTP.WriteTimeout),
 		IdleTimeout:    time.Duration(h.AppCtx.Config.HTTP.IdleTimeout),
 		MaxHeaderBytes: h.AppCtx.Config.HTTP.MaxHeaderMegabytes << 20,
+		ErrorLog:       logger.NewServerLogger(h.AppCtx.Log),
 	}
 
 	return &server
