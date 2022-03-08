@@ -1,7 +1,7 @@
 package appcontext
 
 import (
-	"github.com/droomlab/drm-coupon/internal/config"
+	"github.com/droomlab/drm-coupon/pkg/config"
 	"github.com/droomlab/drm-coupon/pkg/logger"
 	"github.com/pkg/errors"
 )

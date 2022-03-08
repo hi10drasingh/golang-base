@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/droomlab/drm-coupon/internal/appcontext"
+	"github.com/droomlab/drm-coupon/pkg/appcontext"
 )
 
 // Handlers Struct is responsible for server creation and registration of route-handlers mapping

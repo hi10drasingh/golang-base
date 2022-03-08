@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	drmerrors "github.com/droomlab/drm-coupon/internal/errors"
+	drmerrors "github.com/droomlab/drm-coupon/pkg/errors"
 )
 
 func (h *Handlers) logger(han drmHandler) drmHandler {
@@ -53,6 +53,23 @@ func (h *Handlers) panicRecovery(han drmHandler) drmHandler {
 	}
 }
 
+func (h *Handlers) checkMethod(dh drmHandler, method string) drmHandler {
+	return func(w http.ResponseWriter, r *http.Request) error {
+		if method != r.Method {
+			return drmerrors.NewHTTPError(errors.New("failedcnkcn"), http.StatusMethodNotAllowed, drmerrors.MethodNotAllowed)
+		}
+		return dh(w, r)
+	}
+}
+
+func (h *Handlers) get(dh drmHandler) drmHandler {
+	return h.checkMethod(dh, http.MethodGet)
+}
+
+func (h *Handlers) post(dh drmHandler) drmHandler {
+	return h.checkMethod(dh, http.MethodPost)
+}
+
 func (h *Handlers) errorHandler(han drmHandler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var err error = han(w, r) // Call handler function
@@ -91,21 +108,4 @@ func (h *Handlers) errorHandler(han drmHandler) http.HandlerFunc {
 
 		h.AppCtx.Log.Error(clientError.ErrorObj(), clientError.Error())
 	}
-}
-
-func (h *Handlers) checkMethod(dh drmHandler, method string) drmHandler {
-	return func(w http.ResponseWriter, r *http.Request) error {
-		if method != r.Method {
-			return drmerrors.NewHTTPError(errors.New("failedcnkcn"), http.StatusMethodNotAllowed, drmerrors.MethodNotAllowed)
-		}
-		return dh(w, r)
-	}
-}
-
-func (h *Handlers) get(dh drmHandler) drmHandler {
-	return h.checkMethod(dh, http.MethodGet)
-}
-
-func (h *Handlers) post(dh drmHandler) drmHandler {
-	return h.checkMethod(dh, http.MethodPost)
 }

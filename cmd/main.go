@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/droomlab/drm-coupon/internal/app"
+	"github.com/droomlab/drm-coupon/pkg/app"
 )
 
 func main() {

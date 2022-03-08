@@ -9,8 +9,8 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/droomlab/drm-coupon/internal/appcontext"
-	"github.com/droomlab/drm-coupon/internal/transport/rest"
+	"github.com/droomlab/drm-coupon/pkg/appcontext"
+	"github.com/droomlab/drm-coupon/pkg/http/rest"
 )
 
 // Run the http server

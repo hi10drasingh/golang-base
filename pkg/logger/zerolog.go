@@ -4,10 +4,23 @@ import (
 	"io"
 	"os"
 
+	"github.com/droomlab/drm-coupon/pkg/config"
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/pkgerrors"
 )
+
+// Logger provides interface for logging library
+type Logger interface {
+	Errorf(err error, format string, args ...interface{})
+	Error(err error, msg string)
+	Fatalf(err error, format string, args ...interface{})
+	Fatal(err error, msg string)
+	Infof(format string, args ...interface{})
+	Info(msg string)
+	Debugf(format string, args ...interface{})
+	Debug(msg string)
+}
 
 type log struct {
 	Logger *zerolog.Logger
@@ -59,7 +72,7 @@ func (lw *levelWriter) WriteLevel(l zerolog.Level, p []byte) (n int, err error) 
 }
 
 // NewZeroLogger returns a new instance of zerologger
-func NewZeroLogger(conf LogConfig) (Logger, error) {
+func NewZeroLogger(conf config.LogConfig) (Logger, error) {
 	zerolog.ErrorStackMarshaler = pkgerrors.MarshalStack
 	zerolog.SetGlobalLevel(zerolog.Level(conf.Level))
 

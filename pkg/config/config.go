@@ -6,7 +6,6 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/droomlab/drm-coupon/pkg/logger"
 	"github.com/pkg/errors"
 )
 
@@ -15,12 +14,12 @@ type (
 
 	// AppConfig holds application level configuration
 	AppConfig struct {
-		Env   string           `json:"env"`
-		Debug string           `json:"debug"`
-		HTTP  HTTPConfig       `json:"http"`
-		Mysql DBConfig         `json:"mysql"`
-		Mongo DBConfig         `json:"mongo"`
-		Log   logger.LogConfig `json:"log"`
+		Env   string     `json:"env"`
+		Debug string     `json:"debug"`
+		HTTP  HTTPConfig `json:"http"`
+		Mysql DBConfig   `json:"mysql"`
+		Mongo DBConfig   `json:"mongo"`
+		Log   LogConfig  `json:"log"`
 	}
 
 	// DBConfig holds configuration for Database server
@@ -40,6 +39,12 @@ type (
 		WriteTimeout       customTime `json:"writeTimeout"`
 		IdleTimeout        customTime `json:"idleTimeout"`
 		MaxHeaderMegabytes int        `json:"maxHeaderMegaBytes"`
+	}
+
+	// LogConfig holds configuration for logger
+	LogConfig struct {
+		Dir   string `json:"dir"`
+		Level int    `json:"level"`
 	}
 )
 
