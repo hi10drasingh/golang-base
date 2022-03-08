@@ -12,8 +12,8 @@ import (
 type (
 	customTime time.Duration
 
-	// AppConfig holds application level configuration
-	AppConfig struct {
+	// App holds application level configuration
+	App struct {
 		Env   string     `json:"env"`
 		Debug string     `json:"debug"`
 		HTTP  HTTPConfig `json:"http"`
@@ -64,8 +64,8 @@ func (c *customTime) UnmarshalJSON(data []byte) (err error) {
 }
 
 // Load func loads configuration from *.config.json
-func Load(dir string, env string) (*AppConfig, error) {
-	var config *AppConfig
+func Load(dir string, env string) (*App, error) {
+	var config *App
 
 	configFile, err := os.Open(filepath.Join(filepath.Clean(dir), filepath.Clean(env)+".config.json"))
 	if err != nil {

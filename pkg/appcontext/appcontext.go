@@ -8,7 +8,7 @@ import (
 
 // AppContext contains all server level dependencies
 type AppContext struct {
-	Config *config.AppConfig
+	Config *config.App
 	Log    logger.Logger
 }
 
