@@ -6,6 +6,8 @@ import (
 )
 
 var (
+	// NotFound 404
+	NotFound string = http.StatusText(http.StatusNotFound)
 	// MethodNotAllowed 405 Method Not Allowed
 	MethodNotAllowed string = http.StatusText(http.StatusMethodNotAllowed)
 	// InternalServerError 500 Internal Server Error

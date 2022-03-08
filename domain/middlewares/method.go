@@ -14,6 +14,7 @@ import (
 // default ServeMux handler
 func CheckMethod(method string) app.Middleware {
 	m := func(handler app.Handler) app.Handler {
+
 		h := func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 			if method != r.Method {
 				return drmerrors.NewRequestError(errors.New("testing error method"), http.StatusMethodNotAllowed, drmerrors.MethodNotAllowed)

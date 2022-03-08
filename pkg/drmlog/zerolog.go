@@ -29,19 +29,35 @@ type log struct {
 }
 
 func (l *log) Errorf(err error, format string, args ...interface{}) {
-	l.Logger.Error().Stack().Err(errors.WithStack(err)).Msgf(format, args...)
+	if err != nil {
+		l.Logger.Error().Stack().Err(errors.WithStack(err)).Msgf(format, args...)
+		return
+	}
+	l.Logger.Error().Stack().Msgf(format, args...)
 }
 
 func (l *log) Error(err error, msg string) {
-	l.Logger.Error().Stack().Err(errors.WithStack(err)).Msg(msg)
+	if err != nil {
+		l.Logger.Error().Stack().Err(errors.WithStack(err)).Msg(msg)
+		return
+	}
+	l.Logger.Error().Stack().Msg(msg)
 }
 
 func (l *log) Fatalf(err error, format string, args ...interface{}) {
-	l.Logger.Fatal().Stack().Err(errors.WithStack(err)).Msgf(format, args...)
+	if err != nil {
+		l.Logger.Fatal().Stack().Err(errors.WithStack(err)).Msgf(format, args...)
+		return
+	}
+	l.Logger.Fatal().Stack().Msgf(format, args...)
 }
 
 func (l *log) Fatal(err error, msg string) {
-	l.Logger.Error().Stack().Err(errors.WithStack(err)).Msg(msg)
+	if err != nil {
+		l.Logger.Fatal().Stack().Msg(msg)
+		return
+	}
+	l.Logger.Fatal().Stack().Err(errors.WithStack(err)).Msg(msg)
 }
 
 func (l *log) Infof(format string, args ...interface{}) {
