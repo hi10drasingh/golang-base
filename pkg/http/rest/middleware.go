@@ -8,7 +8,7 @@ import (
 
 	clienterr "github.com/droomlab/drm-coupon/pkg/errors"
 
-	httperr "github.com/droomlab/drm-coupon/pkg/errors/http"
+	resterr "github.com/droomlab/drm-coupon/pkg/errors/rest"
 )
 
 func (h *Handlers) logger(han drmHandler) drmHandler {
@@ -58,7 +58,7 @@ func (h *Handlers) panicRecovery(han drmHandler) drmHandler {
 func (h *Handlers) checkMethod(dh drmHandler, method string) drmHandler {
 	return func(w http.ResponseWriter, r *http.Request) error {
 		if method != r.Method {
-			return httperr.NewError(nil, http.StatusMethodNotAllowed, httperr.MethodNotAllowed)
+			return resterr.NewError(nil, http.StatusMethodNotAllowed, resterr.MethodNotAllowed)
 		}
 		return dh(w, r)
 	}
