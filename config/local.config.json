@@ -19,11 +19,14 @@
         }
     ],
     "mongo": {
-        "host": "dev1.droom.in",
-        "port": 3306,
+        "authMechanism": "SCRAM-SHA-256",
+        "authSource": "admin",
+        "hosts": ["dev1.droom.in:27019"],
         "db": "cscart_new",
         "user": "root",
-        "password": "profsnapeisdon"
+        "password": "profsnapeisdon",
+        "connectionTimeout": "1s",
+        "socketTimeout": "1s"
     },
     "log": {
         "dir": "storage/logs",

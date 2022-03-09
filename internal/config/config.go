@@ -27,14 +27,14 @@ type (
 
 	// MongoConfig holds connection details of mongo server
 	MongoConfig struct {
-		Code          string     `json:"code"`
-		AuthMechanism string     `json:"authMechanism"`
-		Host          string     `json:"host"`
-		Port          int        `json:"port"`
-		User          string     `json:"user"`
-		Password      string     `json:"password"`
-		DB            string     `json:"db"`
-		Timeout       customTime `json:"timeout"`
+		AuthMechanism     string     `json:"authMechanism"`
+		AuthSource        string     `json:"authSource"`
+		Hosts             []string   `json:"hosts"`
+		User              string     `json:"user"`
+		Password          string     `json:"password"`
+		DB                string     `json:"db"`
+		ConnectionTimeout customTime `json:"connectionTimeout"`
+		SocketTimeout     customTime `json:"socketTimeout"`
 	}
 
 	// SQLConnConfig holds authentication details for a single sql server

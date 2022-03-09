@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/droomlab/drm-coupon/pkg/app"
+	"github.com/droomlab/drm-coupon/internal/app"
 	"github.com/droomlab/drm-coupon/pkg/drmerrors"
 	"github.com/droomlab/drm-coupon/pkg/drmlog"
 )

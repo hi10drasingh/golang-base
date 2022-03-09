@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/droomlab/drm-coupon/pkg/app"
+	"github.com/droomlab/drm-coupon/internal/app"
 )
 
 // CORS will allow access origin with .droom.in

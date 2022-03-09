@@ -9,13 +9,12 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/droomlab/drm-coupon/pkg/app/handlers"
-	"github.com/droomlab/drm-coupon/pkg/config"
+	"github.com/droomlab/drm-coupon/internal/app/handlers"
+	"github.com/droomlab/drm-coupon/internal/config"
 	"github.com/droomlab/drm-coupon/pkg/drmlog"
+	"github.com/droomlab/drm-coupon/pkg/drmnosql"
 	"github.com/droomlab/drm-coupon/pkg/drmsql"
 	"github.com/pkg/errors"
-
-	_ "github.com/go-sql-driver/mysql"
 )
 
 func main() {
@@ -26,7 +25,7 @@ func main() {
 }
 
 // Run the http server
-func run() error {
+func run() (err error) {
 
 	conf, err := config.Load()
 	if err != nil {
@@ -36,18 +35,42 @@ func run() error {
 	log, err := drmlog.NewZeroLogger(drmlog.Config{
 		LogConfig: conf.Log,
 	})
+
 	if err != nil {
 		return errors.Wrap(err, "Log Initialize")
 	}
 
-	db, err := drmsql.GetDB(drmsql.Config{
+	sqldb, err := drmsql.GetDB(drmsql.Config{
 		SQLConfig: conf.Mysql,
 		Log:       log,
 	})
+
 	if err != nil {
 		return errors.Wrap(err, "SQL DB Initialize")
 	}
-	defer db.Close()
+
+	defer func() {
+		err = sqldb.Close()
+		if err != nil {
+			err = errors.Wrap(err, "SQL DB Close")
+		}
+	}()
+
+	nosqldb, err := drmnosql.GetDB(drmnosql.Config{
+		MongoConfig: conf.Mongo,
+		Log:         log,
+	})
+
+	if err != nil {
+		return errors.Wrap(err, "NoSQL DB Initialize")
+	}
+
+	defer func() {
+		err = nosqldb.Disconnect(context.TODO())
+		if err != nil {
+			err = errors.Wrap(err, "NoSQL DB Close")
+		}
+	}()
 
 	// channel to listen for an interrupt or terminate signal from the OS.
 	shutdown := make(chan os.Signal, 1)

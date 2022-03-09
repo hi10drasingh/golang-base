@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"runtime/debug"
 
-	"github.com/droomlab/drm-coupon/pkg/app"
+	"github.com/droomlab/drm-coupon/internal/app"
 )
 
 // Recovery provides panic handling for application

@@ -6,9 +6,9 @@ import (
 	"net/http"
 
 	"github.com/droomlab/drm-coupon/domain/middlewares"
-	"github.com/droomlab/drm-coupon/pkg/app"
-	"github.com/droomlab/drm-coupon/pkg/app/handlers/v1/testgrp"
-	"github.com/droomlab/drm-coupon/pkg/config"
+	"github.com/droomlab/drm-coupon/internal/app"
+	"github.com/droomlab/drm-coupon/internal/app/handlers/v1/testgrp"
+	"github.com/droomlab/drm-coupon/internal/config"
 	"github.com/droomlab/drm-coupon/pkg/drmerrors"
 	"github.com/droomlab/drm-coupon/pkg/drmlog"
 )

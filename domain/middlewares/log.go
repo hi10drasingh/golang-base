@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/droomlab/drm-coupon/pkg/app"
+	"github.com/droomlab/drm-coupon/internal/app"
 	"github.com/droomlab/drm-coupon/pkg/drmlog"
 )
 

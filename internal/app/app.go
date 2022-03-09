@@ -7,7 +7,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/droomlab/drm-coupon/pkg/config"
+	"github.com/droomlab/drm-coupon/internal/config"
 	"github.com/droomlab/drm-coupon/pkg/drmlog"
 )
 

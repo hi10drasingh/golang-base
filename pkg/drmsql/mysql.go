@@ -4,10 +4,13 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/droomlab/drm-coupon/pkg/config"
+	"github.com/droomlab/drm-coupon/internal/config"
 	"github.com/droomlab/drm-coupon/pkg/drmlog"
 	"github.com/pkg/errors"
 	"github.com/tsenart/nap"
+
+	// Importing mysql driver dependencies
+	_ "github.com/go-sql-driver/mysql"
 )
 
 // Config holds init dependencies for New DB

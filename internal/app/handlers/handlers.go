@@ -5,9 +5,9 @@ import (
 	"os"
 
 	"github.com/droomlab/drm-coupon/domain/middlewares"
-	"github.com/droomlab/drm-coupon/pkg/app"
-	v1 "github.com/droomlab/drm-coupon/pkg/app/handlers/v1"
-	"github.com/droomlab/drm-coupon/pkg/config"
+	"github.com/droomlab/drm-coupon/internal/app"
+	v1 "github.com/droomlab/drm-coupon/internal/app/handlers/v1"
+	"github.com/droomlab/drm-coupon/internal/config"
 	"github.com/droomlab/drm-coupon/pkg/drmlog"
 )
 

@@ -1,0 +1,46 @@
+package drmnosql
+
+import (
+	"context"
+	"time"
+
+	"github.com/droomlab/drm-coupon/internal/config"
+	"github.com/droomlab/drm-coupon/pkg/drmlog"
+	"github.com/pkg/errors"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+)
+
+// Config holds init dependencies for New DB
+type Config struct {
+	MongoConfig config.MongoConfig
+	Log         drmlog.Logger
+}
+
+// GetDB open and pings connection to provided databases
+// and return pointer DB struct with errors
+func GetDB(conf Config) (*mongo.Client, error) {
+	clientOpts := options.Client().SetHosts(conf.MongoConfig.Hosts).SetAuth(options.Credential{
+		Username:   conf.MongoConfig.User,
+		Password:   conf.MongoConfig.Password,
+		AuthSource: conf.MongoConfig.AuthSource,
+		// AuthMechanism: conf.MongoConfig.AuthMechanism,
+	}).SetConnectTimeout(time.Duration(conf.MongoConfig.ConnectionTimeout)).SetSocketTimeout(time.Duration(conf.MongoConfig.SocketTimeout)).SetServerSelectionTimeout(time.Duration(conf.MongoConfig.SocketTimeout))
+
+	client, err := mongo.Connect(context.TODO(), clientOpts)
+
+	if err != nil {
+		return nil, errors.Wrap(err, "NoSQL Database Open Connection")
+	}
+
+	conf.Log.Info(context.TODO(), "NoSQl Database Connected")
+
+	err = client.Ping(context.TODO(), nil)
+	if err != nil {
+		return nil, errors.Wrap(err, "NoSQL Database Connection Testing")
+	}
+
+	conf.Log.Info(context.TODO(), "NoSQl Database Tested")
+
+	return client, nil
+}
