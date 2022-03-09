@@ -20,27 +20,32 @@ type Config struct {
 // GetDB open and pings connection to provided databases
 // and return pointer DB struct with errors
 func GetDB(conf Config) (*mongo.Client, error) {
-	clientOpts := options.Client().SetHosts(conf.MongoConfig.Hosts).SetAuth(options.Credential{
+	connectionTimeout := time.Duration(conf.MongoConfig.ConnectionTimeout)
+
+	clientOpts := options.Client()
+	clientOpts = clientOpts.SetHosts(conf.MongoConfig.Hosts).SetAuth(options.Credential{
 		Username:   conf.MongoConfig.User,
 		Password:   conf.MongoConfig.Password,
 		AuthSource: conf.MongoConfig.AuthSource,
-		// AuthMechanism: conf.MongoConfig.AuthMechanism,
-	}).SetConnectTimeout(time.Duration(conf.MongoConfig.ConnectionTimeout)).SetSocketTimeout(time.Duration(conf.MongoConfig.SocketTimeout)).SetServerSelectionTimeout(time.Duration(conf.MongoConfig.SocketTimeout))
+	}).SetConnectTimeout(connectionTimeout)
 
-	client, err := mongo.Connect(context.TODO(), clientOpts)
+	ctx, cancel := context.WithTimeout(context.Background(), connectionTimeout)
+	defer cancel()
+
+	client, err := mongo.Connect(ctx, clientOpts)
 
 	if err != nil {
 		return nil, errors.Wrap(err, "NoSQL Database Open Connection")
 	}
 
-	conf.Log.Info(context.TODO(), "NoSQl Database Connected")
+	conf.Log.Info(context.Background(), "NoSQl Database Connected")
 
-	err = client.Ping(context.TODO(), nil)
+	err = client.Ping(ctx, nil)
 	if err != nil {
 		return nil, errors.Wrap(err, "NoSQL Database Connection Testing")
 	}
 
-	conf.Log.Info(context.TODO(), "NoSQl Database Tested")
+	conf.Log.Info(context.Background(), "NoSQl Database Tested")
 
 	return client, nil
 }

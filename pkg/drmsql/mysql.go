@@ -29,13 +29,13 @@ func GetDB(conf Config) (*nap.DB, error) {
 		return nil, errors.Wrap(err, "SQL Database Connection Open")
 	}
 
-	conf.Log.Info(context.TODO(), "SQl Database Connected")
+	conf.Log.Info(context.Background(), "SQl Database Connected")
 
 	if err := db.Ping(); err != nil {
 		return nil, errors.Wrap(err, "SQL Database Connection Testing")
 	}
 
-	conf.Log.Info(context.TODO(), "SQl Database Connection Tested")
+	conf.Log.Info(context.Background(), "SQl Database Connection Tested")
 
 	return db, nil
 }

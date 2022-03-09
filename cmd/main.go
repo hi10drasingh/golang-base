@@ -13,6 +13,7 @@ import (
 	"github.com/droomlab/drm-coupon/internal/config"
 	"github.com/droomlab/drm-coupon/pkg/drmlog"
 	"github.com/droomlab/drm-coupon/pkg/drmnosql"
+	"github.com/droomlab/drm-coupon/pkg/drmrmq"
 	"github.com/droomlab/drm-coupon/pkg/drmsql"
 	"github.com/pkg/errors"
 )
@@ -66,9 +67,22 @@ func run() (err error) {
 	}
 
 	defer func() {
-		err = nosqldb.Disconnect(context.TODO())
+		err = nosqldb.Disconnect(context.Background())
 		if err != nil {
 			err = errors.Wrap(err, "NoSQL DB Close")
+		}
+	}()
+
+	rmq, err := drmrmq.NewRabbitMQ(conf.RabbitMQ, log)
+
+	if err != nil {
+		return errors.Wrap(err, "RabbitMQ Initialize")
+	}
+
+	defer func() {
+		err = rmq.Close()
+		if err != nil {
+			err = errors.Wrap(err, "RabbitMQ Close")
 		}
 	}()
 
@@ -80,6 +94,9 @@ func run() (err error) {
 		Shutdown:  shutdown,
 		Log:       log,
 		AppConfig: conf,
+		SQL:       sqldb,
+		NoSQL:     nosqldb,
+		RMQ:       rmq,
 	})
 
 	server := http.Server{
@@ -96,7 +113,7 @@ func run() (err error) {
 	serverErrors := make(chan error, 1)
 
 	go func() {
-		log.Infof(context.TODO(), "app : API listening on port %v", conf.HTTP.Port)
+		log.Infof(context.Background(), "app : API listening on port %v", conf.HTTP.Port)
 		serverErrors <- server.ListenAndServe()
 	}()
 
@@ -106,7 +123,7 @@ func run() (err error) {
 		return fmt.Errorf("error: starting server: %s", err)
 
 	case sig := <-shutdown:
-		log.Infof(context.TODO(), "app : Start shutdown | signal : %v", sig)
+		log.Infof(context.Background(), "app : Start shutdown | signal : %v", sig)
 
 		// give outstanding requests a deadline for completion.
 		timeout := time.Duration(conf.HTTP.ShutdownTimeout)

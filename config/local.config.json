@@ -1,35 +1,42 @@
 {
-    "env": "local",
     "debug": "true",
+    "env": "local",
     "http": {
+        "idleTimeout": "120s",
+        "maxHeaderMegaBytes": 1,
         "port": 8888,
         "readTimeout": "5s",
-        "writeTimeout": "10s",
-        "idleTimeout": "120s",
         "shutdownTimeout": "20s",
-        "maxHeaderMegaBytes": 1
-    },
-    "mysql": [
-        {
-            "host": "dev1.droom.in",
-            "port": 3306,
-            "db": "cscart_new",
-            "user": "root",
-            "password": "profsnapeisdon"
-        }
-    ],
-    "mongo": {
-        "authMechanism": "SCRAM-SHA-256",
-        "authSource": "admin",
-        "hosts": ["dev1.droom.in:27019"],
-        "db": "cscart_new",
-        "user": "root",
-        "password": "profsnapeisdon",
-        "connectionTimeout": "1s",
-        "socketTimeout": "1s"
+        "writeTimeout": "10s"
     },
     "log": {
         "dir": "storage/logs",
         "level": 0
+    },
+    "mongo": {
+        "authSource": "admin",
+        "connectionTimeout": "30s",
+        "db": "droom_new",
+        "hosts": ["dev1.droom.in:27017"],
+        "password": "profsnapeisdon",
+        "user": "root"
+    },
+    "mysql": [
+        {
+            "db": "cscart_new",
+            "host": "dev1.droom.in",
+            "password": "profsnapeisdon",
+            "port": 3306,
+            "user": "root"
+        }
+    ],
+    "rabbitmq": {
+        "enabled": true,
+        "host": "localhost",
+        "password": "nvPysjL4FE5@d@Z",
+        "port": 5672,
+        "timeout": "60s",
+        "user": "admin",
+        "vhost": "/"
     }
 }

@@ -17,32 +17,31 @@ type (
 
 	// App holds application level configuration
 	App struct {
-		Env   string      `json:"env"`
-		Debug string      `json:"debug"`
-		HTTP  HTTPConfig  `json:"http"`
-		Mysql SQLConfig   `json:"mysql"`
-		Mongo MongoConfig `json:"mongo"`
-		Log   LogConfig   `json:"log"`
+		Env      string         `json:"env"`
+		Debug    string         `json:"debug"`
+		HTTP     HTTPConfig     `json:"http"`
+		Mysql    SQLConfig      `json:"mysql"`
+		Mongo    MongoConfig    `json:"mongo"`
+		Log      LogConfig      `json:"log"`
+		RabbitMQ RabbitMQConfig `json:"rabbitmq"`
 	}
 
 	// MongoConfig holds connection details of mongo server
 	MongoConfig struct {
-		AuthMechanism     string     `json:"authMechanism"`
 		AuthSource        string     `json:"authSource"`
 		Hosts             []string   `json:"hosts"`
 		User              string     `json:"user"`
 		Password          string     `json:"password"`
 		DB                string     `json:"db"`
 		ConnectionTimeout customTime `json:"connectionTimeout"`
-		SocketTimeout     customTime `json:"socketTimeout"`
 	}
 
 	// SQLConnConfig holds authentication details for a single sql server
 	SQLConnConfig struct {
-		User     string `json:"user"`
-		Password string `json:"password"`
 		Host     string `json:"host"`
 		Port     int    `json:"port"`
+		User     string `json:"user"`
+		Password string `json:"password"`
 		DB       string `json:"db"`
 	}
 
@@ -64,6 +63,17 @@ type (
 	LogConfig struct {
 		Dir   string `json:"dir"`
 		Level int    `json:"level"`
+	}
+
+	// RabbitMQConfig holds conf fro amqp server
+	RabbitMQConfig struct {
+		Host     string     `json:"host"`
+		Port     int        `json:"port"`
+		User     string     `json:"user"`
+		Password string     `json:"password"`
+		VHost    string     `json:"vhost"`
+		Timeout  customTime `json:"timeout"`
+		Enabled  bool       `json:"enabled"`
 	}
 )
 

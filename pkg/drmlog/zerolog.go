@@ -128,7 +128,7 @@ type errorWriter struct {
 }
 
 func (ew *errorWriter) Write(p []byte) (int, error) {
-	ew.logger.Error(context.TODO(), errors.New(string(p)), "Server Internal Error")
+	ew.logger.Error(context.Background(), errors.New(string(p)), "Server Internal Error")
 	return len(p), nil
 }
 
