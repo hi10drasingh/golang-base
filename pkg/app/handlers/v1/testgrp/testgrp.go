@@ -15,15 +15,15 @@ type Handlers struct {
 }
 
 // NewHandlers return new instance of handler
-func NewHandlers(log drmlog.Logger) *Handlers {
-	return &Handlers{
+func NewHandlers(log drmlog.Logger) Handlers {
+	return Handlers{
 		Slug: "test",
 		Log:  log,
 	}
 }
 
 // Hello is sample route handler
-func (h *Handlers) Hello(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
+func (h Handlers) Hello(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 	fmt.Fprint(w, "hello, world!\n")
 	h.Log.Info(ctx, "Workign")
 	return nil

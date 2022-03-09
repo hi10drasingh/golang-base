@@ -44,12 +44,12 @@ func getDataSourceName(conf config.SQLConfig) (dsns string) {
 	)
 
 	for i = 0; i < len(conf)-1; {
-		dsns += fmt.Sprintf("tcp://%s:%s@%s:%v/%s;", DBConf.User, DBConf.Password, DBConf.Host, DBConf.Port, DBConf.DB)
+		dsns += fmt.Sprintf("%s:%s@tcp(%s:%d)/%s;", DBConf.User, DBConf.Password, DBConf.Host, DBConf.Port, DBConf.DB)
 		DBConf = conf[i]
 		i++
 	}
 
-	dsns += fmt.Sprintf("tcp://%s:%s@%s:%v/%s", DBConf.User, DBConf.Password, DBConf.Host, DBConf.Port, DBConf.DB)
+	dsns += fmt.Sprintf("%s:%s@tcp(%s:%d)/%s", DBConf.User, DBConf.Password, DBConf.Host, DBConf.Port, DBConf.DB)
 
 	return
 }

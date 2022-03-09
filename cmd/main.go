@@ -42,6 +42,7 @@ func run() error {
 
 	db, err := drmsql.GetDB(drmsql.Config{
 		SQLConfig: conf.Mysql,
+		Log:       log,
 	})
 	if err != nil {
 		return errors.Wrap(err, "SQL DB Initialize")
