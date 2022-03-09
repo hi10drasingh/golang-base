@@ -17,22 +17,37 @@ type (
 
 	// App holds application level configuration
 	App struct {
-		Env   string     `json:"env"`
-		Debug string     `json:"debug"`
-		HTTP  HTTPConfig `json:"http"`
-		Mysql DBConfig   `json:"mysql"`
-		Mongo DBConfig   `json:"mongo"`
-		Log   LogConfig  `json:"log"`
+		Env   string      `json:"env"`
+		Debug string      `json:"debug"`
+		HTTP  HTTPConfig  `json:"http"`
+		Mysql SQLConfig   `json:"mysql"`
+		Mongo MongoConfig `json:"mongo"`
+		Log   LogConfig   `json:"log"`
 	}
 
-	// DBConfig holds configuration for Database server
-	DBConfig struct {
-		Host string `json:"host"`
-		Port int    `json:"port"`
-		DB   string `json:"db"`
-		User string `json:"user,omitempty"`
-		Pass string `json:"pass,omitempty"`
+	// MongoConfig holds connection details of mongo server
+	MongoConfig struct {
+		Code          string     `json:"code"`
+		AuthMechanism string     `json:"authMechanism"`
+		Host          string     `json:"host"`
+		Port          int        `json:"port"`
+		User          string     `json:"user"`
+		Password      string     `json:"password"`
+		DB            string     `json:"db"`
+		Timeout       customTime `json:"timeout"`
 	}
+
+	// SQLConnConfig holds authentication details for a single sql server
+	SQLConnConfig struct {
+		User     string `json:"user"`
+		Password string `json:"password"`
+		Host     string `json:"host"`
+		Port     int    `json:"port"`
+		DB       string `json:"db"`
+	}
+
+	// SQLConfig holds auth details of all servers
+	SQLConfig []SQLConnConfig
 
 	// HTTPConfig holds configuration for HTTP server
 	HTTPConfig struct {

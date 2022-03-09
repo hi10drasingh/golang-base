@@ -15,7 +15,7 @@ func Errors(log drmlog.Logger) app.Middleware {
 
 		h := func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 			if err := handler(ctx, w, r); err != nil {
-				log.Error(err, "Error in Handler")
+				log.Error(ctx, err, "Error in Handler")
 
 				var er drmerrors.ErrorResponse
 

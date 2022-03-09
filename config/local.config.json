@@ -9,19 +9,21 @@
         "shutdownTimeout": "20s",
         "maxHeaderMegaBytes": 1
     },
-    "mysql": {
-        "host": "dev1.droom.in",
-        "port": 3306,
-        "db": "cscart_new",
-        "user": "root",
-        "pass": "profsnapeisdon"
-    },
+    "mysql": [
+        {
+            "host": "dev1.droom.in",
+            "port": 3306,
+            "db": "cscart_new",
+            "user": "root",
+            "password": "profsnapeisdon"
+        }
+    ],
     "mongo": {
         "host": "dev1.droom.in",
         "port": 3306,
         "db": "cscart_new",
         "user": "root",
-        "pass": "profsnapeisdon"
+        "password": "profsnapeisdon"
     },
     "log": {
         "dir": "storage/logs",

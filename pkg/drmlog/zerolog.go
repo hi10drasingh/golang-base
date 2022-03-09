@@ -1,6 +1,7 @@
 package drmlog
 
 import (
+	"context"
 	"io"
 	glog "log"
 	"os"
@@ -14,21 +15,26 @@ import (
 
 // Logger provides interface for logging library
 type Logger interface {
-	Errorf(err error, format string, args ...interface{})
-	Error(err error, msg string)
-	Fatalf(err error, format string, args ...interface{})
-	Fatal(err error, msg string)
-	Infof(format string, args ...interface{})
-	Info(msg string)
-	Debugf(format string, args ...interface{})
-	Debug(msg string)
+	Errorf(ctx context.Context, err error, format string, args ...interface{})
+	Error(ctx context.Context, err error, msg string)
+	Fatalf(ctx context.Context, err error, format string, args ...interface{})
+	Fatal(ctx context.Context, err error, msg string)
+	Infof(ctx context.Context, format string, args ...interface{})
+	Info(ctx context.Context, msg string)
+	Debugf(ctx context.Context, format string, args ...interface{})
+	Debug(ctx context.Context, msg string)
+}
+
+// Config holds init dependencies for New Logger
+type Config struct {
+	LogConfig config.LogConfig
 }
 
 type log struct {
 	Logger *zerolog.Logger
 }
 
-func (l *log) Errorf(err error, format string, args ...interface{}) {
+func (l *log) Errorf(ctx context.Context, err error, format string, args ...interface{}) {
 	if err != nil {
 		l.Logger.Error().Stack().Err(errors.WithStack(err)).Msgf(format, args...)
 		return
@@ -36,7 +42,7 @@ func (l *log) Errorf(err error, format string, args ...interface{}) {
 	l.Logger.Error().Stack().Msgf(format, args...)
 }
 
-func (l *log) Error(err error, msg string) {
+func (l *log) Error(ctx context.Context, err error, msg string) {
 	if err != nil {
 		l.Logger.Error().Stack().Err(errors.WithStack(err)).Msg(msg)
 		return
@@ -44,7 +50,7 @@ func (l *log) Error(err error, msg string) {
 	l.Logger.Error().Stack().Msg(msg)
 }
 
-func (l *log) Fatalf(err error, format string, args ...interface{}) {
+func (l *log) Fatalf(ctx context.Context, err error, format string, args ...interface{}) {
 	if err != nil {
 		l.Logger.Fatal().Stack().Err(errors.WithStack(err)).Msgf(format, args...)
 		return
@@ -52,7 +58,7 @@ func (l *log) Fatalf(err error, format string, args ...interface{}) {
 	l.Logger.Fatal().Stack().Msgf(format, args...)
 }
 
-func (l *log) Fatal(err error, msg string) {
+func (l *log) Fatal(ctx context.Context, err error, msg string) {
 	if err != nil {
 		l.Logger.Fatal().Stack().Msg(msg)
 		return
@@ -60,19 +66,19 @@ func (l *log) Fatal(err error, msg string) {
 	l.Logger.Fatal().Stack().Err(errors.WithStack(err)).Msg(msg)
 }
 
-func (l *log) Infof(format string, args ...interface{}) {
+func (l *log) Infof(ctx context.Context, format string, args ...interface{}) {
 	l.Logger.Info().Msgf(format, args...)
 }
 
-func (l *log) Info(msg string) {
+func (l *log) Info(ctx context.Context, msg string) {
 	l.Logger.Info().Msg(msg)
 }
 
-func (l *log) Debugf(format string, args ...interface{}) {
+func (l *log) Debugf(ctx context.Context, format string, args ...interface{}) {
 	l.Logger.Debug().Msgf(format, args...)
 }
 
-func (l *log) Debug(msg string) {
+func (l *log) Debug(ctx context.Context, msg string) {
 	l.Logger.Debug().Msg(msg)
 }
 
@@ -90,15 +96,15 @@ func (lw *levelWriter) WriteLevel(l zerolog.Level, p []byte) (n int, err error) 
 }
 
 // NewZeroLogger returns a new instance of zerologger
-func NewZeroLogger(conf config.LogConfig) (Logger, error) {
+func NewZeroLogger(conf Config) (Logger, error) {
 	zerolog.ErrorStackMarshaler = pkgerrors.MarshalStack
 
-	lvlWriter, err := newLevelWriter(conf.Dir+"/app.log", conf.Dir+"/error.log")
+	lvlWriter, err := newLevelWriter(conf.LogConfig.Dir+"/app.log", conf.LogConfig.Dir+"/error.log")
 	if err != nil {
 		return nil, errors.Wrap(err, "New Level Writer")
 	}
 
-	logWriter := zerolog.New(lvlWriter).Level(zerolog.Level(conf.Level)).With().CallerWithSkipFrameCount(zerolog.CallerSkipFrameCount + 1).Timestamp().Logger()
+	logWriter := zerolog.New(lvlWriter).Level(zerolog.Level(conf.LogConfig.Level)).With().CallerWithSkipFrameCount(zerolog.CallerSkipFrameCount + 1).Timestamp().Logger()
 
 	return &log{&logWriter}, nil
 }
@@ -122,7 +128,7 @@ type errorWriter struct {
 }
 
 func (ew *errorWriter) Write(p []byte) (int, error) {
-	ew.logger.Error(errors.New(string(p)), "Server Internal Error")
+	ew.logger.Error(context.TODO(), errors.New(string(p)), "Server Internal Error")
 	return len(p), nil
 }
 

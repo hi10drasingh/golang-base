@@ -25,6 +25,6 @@ func NewHandlers(log drmlog.Logger) *Handlers {
 // Hello is sample route handler
 func (h *Handlers) Hello(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 	fmt.Fprint(w, "hello, world!\n")
-	h.Log.Info("Workign")
+	h.Log.Info(ctx, "Workign")
 	return nil
 }

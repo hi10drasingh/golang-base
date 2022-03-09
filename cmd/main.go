@@ -12,7 +12,10 @@ import (
 	"github.com/droomlab/drm-coupon/pkg/app/handlers"
 	"github.com/droomlab/drm-coupon/pkg/config"
 	"github.com/droomlab/drm-coupon/pkg/drmlog"
+	"github.com/droomlab/drm-coupon/pkg/drmsql"
 	"github.com/pkg/errors"
+
+	_ "github.com/go-sql-driver/mysql"
 )
 
 func main() {
@@ -30,10 +33,20 @@ func run() error {
 		return errors.Wrap(err, "Config Initialize")
 	}
 
-	log, err := drmlog.NewZeroLogger(conf.Log)
+	log, err := drmlog.NewZeroLogger(drmlog.Config{
+		LogConfig: conf.Log,
+	})
 	if err != nil {
 		return errors.Wrap(err, "Log Initialize")
 	}
+
+	db, err := drmsql.GetDB(drmsql.Config{
+		SQLConfig: conf.Mysql,
+	})
+	if err != nil {
+		return errors.Wrap(err, "SQL DB Initialize")
+	}
+	defer db.Close()
 
 	// channel to listen for an interrupt or terminate signal from the OS.
 	shutdown := make(chan os.Signal, 1)
@@ -59,7 +72,7 @@ func run() error {
 	serverErrors := make(chan error, 1)
 
 	go func() {
-		log.Infof("app : API listening on port %v", conf.HTTP.Port)
+		log.Infof(context.TODO(), "app : API listening on port %v", conf.HTTP.Port)
 		serverErrors <- server.ListenAndServe()
 	}()
 
@@ -69,7 +82,7 @@ func run() error {
 		return fmt.Errorf("error: starting server: %s", err)
 
 	case sig := <-shutdown:
-		log.Infof("app : Start shutdown | signal : %v", sig)
+		log.Infof(context.TODO(), "app : Start shutdown | signal : %v", sig)
 
 		// give outstanding requests a deadline for completion.
 		timeout := time.Duration(conf.HTTP.ShutdownTimeout)
@@ -79,7 +92,7 @@ func run() error {
 		// asking listener to shutdown
 		err := server.Shutdown(ctx)
 		if err != nil {
-			log.Infof("app : Graceful shutdown did not complete in %v : %v", timeout, err)
+			log.Infof(ctx, "app : Graceful shutdown did not complete in %v : %v", timeout, err)
 			err = server.Close()
 		}
 
