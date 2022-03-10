@@ -51,9 +51,9 @@ func run() (err error) {
 	}
 
 	defer func() {
-		err = sqldb.Close()
-		if err != nil {
-			err = errors.Wrap(err, "SQL DB Close")
+		err1 := sqldb.Close()
+		if err1 != nil {
+			err = errors.Wrap(err1, "SQL DB Close")
 		}
 	}()
 
@@ -67,9 +67,9 @@ func run() (err error) {
 	}
 
 	defer func() {
-		err = nosqldb.Disconnect(context.Background())
-		if err != nil {
-			err = errors.Wrap(err, "NoSQL DB Close")
+		err1 := nosqldb.Disconnect(context.Background())
+		if err1 != nil {
+			err = errors.Wrap(err1, "NoSQL DB Close")
 		}
 	}()
 
@@ -78,13 +78,6 @@ func run() (err error) {
 	if err != nil {
 		return errors.Wrap(err, "RabbitMQ Initialize")
 	}
-
-	defer func() {
-		err = rmq.Close()
-		if err != nil {
-			err = errors.Wrap(err, "RabbitMQ Close")
-		}
-	}()
 
 	// channel to listen for an interrupt or terminate signal from the OS.
 	shutdown := make(chan os.Signal, 1)
@@ -119,7 +112,7 @@ func run() (err error) {
 
 	// blocking run and waiting for shutdown.
 	select {
-	case err := <-serverErrors:
+	case err = <-serverErrors:
 		return fmt.Errorf("error: starting server: %s", err)
 
 	case sig := <-shutdown:

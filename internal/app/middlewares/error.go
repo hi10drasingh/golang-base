@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/droomlab/drm-coupon/internal/app"
-	"github.com/droomlab/drm-coupon/pkg/drmerrors"
+	drmerrors "github.com/droomlab/drm-coupon/internal/app/response/error"
 	"github.com/droomlab/drm-coupon/pkg/drmlog"
 )
 
@@ -29,11 +29,10 @@ func Errors(log drmlog.Logger) app.Middleware {
 					}
 
 				default:
-					er = drmerrors.ErrorResponse{
-						Code:       drmerrors.CodeFailed,
-						Message:    http.StatusText(http.StatusInternalServerError),
-						StatusCode: http.StatusInternalServerError,
-					}
+					er = drmerrors.NewErrorResponse(
+						drmerrors.StatusInternalServerError,
+						drmerrors.StatusText(drmerrors.StatusInternalServerError),
+					)
 				}
 
 				// Respond with the error back to the client.

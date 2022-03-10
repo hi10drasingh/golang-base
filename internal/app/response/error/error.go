@@ -1,21 +1,34 @@
-package drmerrors
+package errors
 
 import (
 	"errors"
 	"net/http"
 )
 
-var (
-	// NotFound 404
-	NotFound string = http.StatusText(http.StatusNotFound)
-	// MethodNotAllowed 405 Method Not Allowed
-	MethodNotAllowed string = http.StatusText(http.StatusMethodNotAllowed)
-	// InternalServerError 500 Internal Server Error
-	InternalServerError string = http.StatusText(http.StatusInternalServerError)
+const code = "failed"
+
+const (
+
+	// StatusNotFound 404 Route Not Found
+	StatusNotFound int = http.StatusNotFound
+
+	// StatusMethodNotAllowed 405 Method Not Allowed
+	StatusMethodNotAllowed int = http.StatusMethodNotAllowed
+
+	// StatusInternalServerError 500 Internal Server Error
+	StatusInternalServerError int = http.StatusInternalServerError
 )
 
-// CodeFailed used for request errors
-const CodeFailed = "failed"
+var statusText = map[int]string{
+	StatusNotFound:            "Not Found",
+	StatusMethodNotAllowed:    "Method Not Allowed",
+	StatusInternalServerError: "Internal Server Error",
+}
+
+// StatusText return message crossponding to a status code
+func StatusText(code int) string {
+	return statusText[code]
+}
 
 // ErrorResponse prodives sending error response to client
 type ErrorResponse struct {
@@ -36,7 +49,7 @@ type RequestError struct {
 func NewRequestError(err error, status int, message string) error {
 	return &RequestError{
 		Err:     err,
-		Code:    "failed",
+		Code:    code,
 		Message: message,
 		Status:  status,
 	}
@@ -59,4 +72,13 @@ func GetRequestError(err error) *RequestError {
 		return nil
 	}
 	return re
+}
+
+// NewErrorResponse return a new error reponse with provided status and code
+func NewErrorResponse(status int, message string) ErrorResponse {
+	return ErrorResponse{
+		Code:       code,
+		Message:    message,
+		StatusCode: status,
+	}
 }

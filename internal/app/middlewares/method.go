@@ -7,7 +7,7 @@ import (
 
 	"github.com/droomlab/drm-coupon/internal/app"
 
-	"github.com/droomlab/drm-coupon/pkg/drmerrors"
+	drmerrors "github.com/droomlab/drm-coupon/internal/app/response/error"
 )
 
 // CheckMethod provide reuqest method checking for
@@ -17,7 +17,7 @@ func CheckMethod(method string) app.Middleware {
 
 		h := func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 			if method != r.Method {
-				return drmerrors.NewRequestError(errors.New("testing error method"), http.StatusMethodNotAllowed, drmerrors.MethodNotAllowed)
+				return drmerrors.NewRequestError(errors.New("testing error method"), drmerrors.StatusMethodNotAllowed, drmerrors.StatusText(drmerrors.StatusMethodNotAllowed))
 			}
 			return handler(ctx, w, r)
 		}

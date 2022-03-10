@@ -28,6 +28,13 @@
             "password": "profsnapeisdon",
             "port": 3306,
             "user": "root"
+        },
+        {
+            "db": "credit_new1",
+            "host": "localhost",
+            "password": "root@123",
+            "port": 3306,
+            "user": "root"
         }
     ],
     "rabbitmq": {

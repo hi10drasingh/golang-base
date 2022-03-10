@@ -29,15 +29,34 @@ func NewRabbitMQ(conf config.RabbitMQConfig, log drmlog.Logger) (*RabbitMQ, erro
 
 	err := rq.Connect()
 
-	return &rq, err
+	if err != nil {
+		return nil, errors.Wrap(err, "RabbitMQ Channel Conenct")
+	}
 
+	err = rq.Chan.Close()
+
+	if err != nil {
+		return nil, errors.Wrap(err, "RabbitMQ Channel Close")
+	}
+
+	return &rq, nil
+
+}
+
+// CheckEnabled checks if rabbitmq is enabled
+func (rq *RabbitMQ) CheckEnabled() error {
+	if !rq.RMQConfig.Enabled {
+		return errors.New("RabbitMQ is disabled")
+	}
+
+	return nil
 }
 
 // Connect connects to amqp server
 func (rq *RabbitMQ) Connect() (err error) {
 	connectionTimeout := time.Duration(rq.RMQConfig.Timeout)
 
-	address := fmt.Sprintf("amqp://%s:%s@%s:%d/",
+	address := fmt.Sprintf("amqp://%s:%s@%s:%d",
 		rq.RMQConfig.User,
 		rq.RMQConfig.Password,
 		rq.RMQConfig.Host,
@@ -45,6 +64,7 @@ func (rq *RabbitMQ) Connect() (err error) {
 	)
 
 	conn, err := amqp.DialConfig(address, amqp.Config{
+		Vhost: rq.RMQConfig.Vhost,
 		Dial: func(network, addr string) (net.Conn, error) {
 			return net.DialTimeout(network, addr, connectionTimeout)
 		},

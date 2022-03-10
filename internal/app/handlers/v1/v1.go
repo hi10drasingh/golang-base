@@ -5,11 +5,12 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/droomlab/drm-coupon/domain/middlewares"
 	"github.com/droomlab/drm-coupon/internal/app"
 	"github.com/droomlab/drm-coupon/internal/app/handlers/v1/testgrp"
+	"github.com/droomlab/drm-coupon/internal/app/middlewares"
+	drmerror "github.com/droomlab/drm-coupon/internal/app/response/error"
+	drmsucces "github.com/droomlab/drm-coupon/internal/app/response/success"
 	"github.com/droomlab/drm-coupon/internal/config"
-	"github.com/droomlab/drm-coupon/pkg/drmerrors"
 	"github.com/droomlab/drm-coupon/pkg/drmlog"
 	"github.com/droomlab/drm-coupon/pkg/drmrmq"
 	"github.com/tsenart/nap"
@@ -41,6 +42,14 @@ func Routes(a *app.App, conf Config) {
 
 	// NotFound Handler
 	a.Handle("", "/", func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
-		return drmerrors.NewRequestError(errors.New(drmerrors.NotFound), http.StatusNotFound, drmerrors.NotFound)
+		if r.URL.Path == "/" {
+			data := [][]byte{}
+			return app.Respond(ctx, w, drmsucces.NewResponse(data, "Wellcome!"), http.StatusOK)
+		}
+
+		status := drmerror.StatusNotFound
+		message := drmerror.StatusText(status)
+
+		return drmerror.NewRequestError(errors.New(message), status, message)
 	})
 }

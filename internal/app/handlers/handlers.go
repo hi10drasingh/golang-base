@@ -4,9 +4,9 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/droomlab/drm-coupon/domain/middlewares"
 	"github.com/droomlab/drm-coupon/internal/app"
 	v1 "github.com/droomlab/drm-coupon/internal/app/handlers/v1"
+	"github.com/droomlab/drm-coupon/internal/app/middlewares"
 	"github.com/droomlab/drm-coupon/internal/config"
 	"github.com/droomlab/drm-coupon/pkg/drmlog"
 	"github.com/droomlab/drm-coupon/pkg/drmrmq"

@@ -17,6 +17,12 @@ type PublishConfig struct {
 // Publish will send the provided msg to provided exchange
 // It also awk
 func (rq *RabbitMQ) Publish(ctx context.Context, publishConfig PublishConfig) (err error) {
+	err = rq.CheckEnabled()
+
+	if err != nil {
+		return errors.Wrap(err, "Publish Error")
+	}
+
 	err = rq.Connect()
 
 	if err != nil {

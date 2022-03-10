@@ -71,7 +71,7 @@ type (
 		Port     int        `json:"port"`
 		User     string     `json:"user"`
 		Password string     `json:"password"`
-		VHost    string     `json:"vhost"`
+		Vhost    string     `json:"vhost"`
 		Timeout  customTime `json:"timeout"`
 		Enabled  bool       `json:"enabled"`
 	}
