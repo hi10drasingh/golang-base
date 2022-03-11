@@ -11,15 +11,15 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-// Config holds init dependencies for New DB
+// Config holds init dependencies for New DB.
 type Config struct {
 	MongoConfig config.MongoConfig
 	Log         drmlog.Logger
 }
 
 // GetDB open and pings connection to provided databases
-// and return pointer DB struct with errors
-func GetDB(conf Config) (*mongo.Client, error) {
+// and return pointer DB struct with errors.
+func GetDB(conf *Config) (*mongo.Client, error) {
 	connectionTimeout := time.Duration(conf.MongoConfig.ConnectionTimeout)
 
 	clientOpts := options.Client()
@@ -33,7 +33,6 @@ func GetDB(conf Config) (*mongo.Client, error) {
 	defer cancel()
 
 	client, err := mongo.Connect(ctx, clientOpts)
-
 	if err != nil {
 		return nil, errors.Wrap(err, "NoSQL Database Open Connection")
 	}

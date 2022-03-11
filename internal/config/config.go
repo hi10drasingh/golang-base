@@ -10,12 +10,12 @@ import (
 	"github.com/pkg/errors"
 )
 
-const directory string = "config"
+const directory = "config"
 
 type (
 	customTime time.Duration
 
-	// App holds application level configuration
+	// App holds application level configuration.
 	App struct {
 		Env      string         `json:"env"`
 		Debug    string         `json:"debug"`
@@ -26,7 +26,7 @@ type (
 		RabbitMQ RabbitMQConfig `json:"rabbitmq"`
 	}
 
-	// MongoConfig holds connection details of mongo server
+	// MongoConfig holds connection details of mongo server.
 	MongoConfig struct {
 		AuthSource        string     `json:"authSource"`
 		Hosts             []string   `json:"hosts"`
@@ -36,7 +36,7 @@ type (
 		ConnectionTimeout customTime `json:"connectionTimeout"`
 	}
 
-	// SQLConnConfig holds authentication details for a single sql server
+	// SQLConnConfig holds authentication details for a single sql server.
 	SQLConnConfig struct {
 		Host     string `json:"host"`
 		Port     int    `json:"port"`
@@ -45,10 +45,10 @@ type (
 		DB       string `json:"db"`
 	}
 
-	// SQLConfig holds auth details of all servers
+	// SQLConfig holds auth details of all servers.
 	SQLConfig []SQLConnConfig
 
-	// HTTPConfig holds configuration for HTTP server
+	// HTTPConfig holds configuration for HTTP server.
 	HTTPConfig struct {
 		Host               string     `json:"host"`
 		Port               int        `json:"port"`
@@ -59,13 +59,13 @@ type (
 		MaxHeaderMegabytes int        `json:"maxHeaderMegaBytes"`
 	}
 
-	// LogConfig holds configuration for logger
+	// LogConfig holds configuration for logger.
 	LogConfig struct {
 		Dir   string `json:"dir"`
 		Level int    `json:"level"`
 	}
 
-	// RabbitMQConfig holds conf fro amqp server
+	// RabbitMQConfig holds conf fro amqp server.
 	RabbitMQConfig struct {
 		Host     string     `json:"host"`
 		Port     int        `json:"port"`
@@ -77,24 +77,27 @@ type (
 	}
 )
 
-// Custom unmarshaling for timr in string
-func (c *customTime) UnmarshalJSON(data []byte) (err error) {
+// Custom unmarshaling for timr in string.
+func (c *customTime) UnmarshalJSON(data []byte) error {
 	var tmp string
 
-	if err = json.Unmarshal(data, &tmp); err != nil {
-		return err
+	if err := json.Unmarshal(data, &tmp); err != nil {
+		return errors.Wrap(err, "Custom Time Unmarshal")
 	}
 
-	time, err := time.ParseDuration(tmp)
+	dur, err := time.ParseDuration(tmp)
+	if err != nil {
+		return errors.Wrap(err, "Custom Time Unmarshal")
+	}
 
-	*c = customTime(time)
+	*c = customTime(dur)
 
-	return err
+	return errors.Wrap(err, "Custom Time Unmarshal")
 }
 
-// Load func loads configuration from *.config.json
+// Load func loads configuration from *.config.json.
 func Load() (*App, error) {
-	var env string = "local"
+	env := "local"
 	// Path to config file can be passed in.
 	flag.StringVar(&env, "env", env, "Environment")
 	flag.Parse()
@@ -103,12 +106,12 @@ func Load() (*App, error) {
 
 	configFile, err := os.Open(filepath.Join(filepath.Clean(directory), filepath.Clean(env)+".config.json"))
 	if err != nil {
-		return config, errors.Wrap(err, "Config File Open")
+		return config, errors.Wrap(err, "Config Init")
 	}
 
 	defer func() {
 		cerr := configFile.Close()
-		if err == nil {
+		if cerr == nil {
 			err = cerr
 		}
 	}()
@@ -116,9 +119,5 @@ func Load() (*App, error) {
 	jsonParser := json.NewDecoder(configFile)
 	err = jsonParser.Decode(&config)
 
-	if err != nil {
-		return config, errors.Wrap(err, "Config File Decode")
-	}
-
-	return config, err
+	return config, errors.Wrap(err, "Config Init")
 }

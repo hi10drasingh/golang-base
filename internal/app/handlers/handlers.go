@@ -7,42 +7,28 @@ import (
 	"github.com/droomlab/drm-coupon/internal/app"
 	v1 "github.com/droomlab/drm-coupon/internal/app/handlers/v1"
 	"github.com/droomlab/drm-coupon/internal/app/middlewares"
-	"github.com/droomlab/drm-coupon/internal/config"
-	"github.com/droomlab/drm-coupon/pkg/drmlog"
-	"github.com/droomlab/drm-coupon/pkg/drmrmq"
-	"github.com/tsenart/nap"
-	"go.mongodb.org/mongo-driver/mongo"
+	"github.com/droomlab/drm-coupon/internal/app/server"
 )
 
-// Config holds global dependencies for handler
+// Config holds global dependencies for handler.
 type Config struct {
-	Shutdown  chan os.Signal
-	Log       drmlog.Logger
-	AppConfig *config.App
-	SQL       *nap.DB
-	NoSQL     *mongo.Client
-	RMQ       *drmrmq.RabbitMQ
+	Shutdown chan os.Signal
+	Deps     *server.Dependencies
 }
 
-// NewHandlers return new instance of handler
+// NewHandlers return new instance of handler.
 func NewHandlers(conf Config) http.Handler {
-	app := app.NewApp(
+	globalHandl := app.NewApp(
 		conf.Shutdown,
-		conf.Log,
-		conf.AppConfig,
+		conf.Deps.Log,
+		conf.Deps.Config,
 		middlewares.CORS(),
-		middlewares.Logger(conf.Log),
-		middlewares.Errors(conf.Log),
-		middlewares.Recovery(),
+		middlewares.Logger(conf.Deps.Log),
+		middlewares.Errors(conf.Deps.Log),
+		middlewares.Recovery(conf.Deps.Log),
 	)
 
-	v1.Routes(app, v1.Config{
-		Log:       conf.Log,
-		AppConfig: conf.AppConfig,
-		SQL:       conf.SQL,
-		NoSQL:     conf.NoSQL,
-		RMQ:       conf.RMQ,
-	})
+	v1.Routes(globalHandl, conf.Deps)
 
-	return app
+	return globalHandl
 }

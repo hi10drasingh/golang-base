@@ -30,17 +30,17 @@
             "user": "root"
         },
         {
-            "db": "credit_new1",
-            "host": "localhost",
-            "password": "root@123",
+            "db": "cscart_new",
+            "host": "dev1.droom.in",
+            "password": "profsnapeisdon",
             "port": 3306,
             "user": "root"
         }
     ],
     "rabbitmq": {
         "enabled": true,
-        "host": "localhost",
-        "password": "nvPysjL4FE5@d@Z",
+        "host": "dev1.droom.in",
+        "password": "pratdroom1",
         "port": 5672,
         "timeout": "60s",
         "user": "admin",

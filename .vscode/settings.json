@@ -1,36 +1,35 @@
 {
-  "editor.tabSize": 4,
-  "editor.wordWrap": "on",
+    "editor.tabSize": 4,
+    "editor.wordWrap": "on",
 
-  "go.formatTool": "goimports",
-  "go.formatFlags": ["-s", "-w", "-e"],
-  "go.useLanguageServer": true,
-  "[go]": {
-    "editor.defaultFormatter": "golang.go",
-    "editor.formatOnSave": true,
-    "editor.codeActionsOnSave": {
-      "source.organizeImports": true
+    "go.formatTool": "gofumports",
+    "go.formatFlags": ["-s", "-w", "-e"],
+
+    "go.lintTool": "golangci-lint",
+    "go.lintOnSave": "file",
+    // "go.lintFlags": ["--fast"],
+
+    "go.useLanguageServer": true,
+    "gopls": {
+        "formatting.gofumpt": true
+    },
+
+    "[go]": {
+        "editor.defaultFormatter": "golang.go",
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": true
+        }
+    },
+
+    "go.docsTool": "gogetdoc",
+    "go.autocompleteUnimportedPackages": true,
+
+    "go.buildOnSave": "workspace",
+    "go.toolsManagement.autoUpdate": true,
+    "go.installDependenciesWhenBuilding": true,
+
+    "[json]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
     }
-  },
-  "go.docsTool": "gogetdoc",
-  "go.autocompleteUnimportedPackages": true,
-  "go.lintTool": "golangci-lint",
-  "go.lintOnSave": "file",
-  "go.lintFlags": ["--fast"],
-  "go.buildOnSave": "workspace",
-  "go.toolsManagement.autoUpdate": true,
-  "go.installDependenciesWhenBuilding": true,
-  "[json]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
-
-  "[yaml]": {
-    "editor.insertSpaces": true,
-    "editor.tabSize": 2,
-    "editor.defaultFormatter": "redhat.vscode-yaml"
-  },
-  "editor.tokenColorCustomizations": {
-    "comments": "",
-    "textMateRules": []
-  }
 }

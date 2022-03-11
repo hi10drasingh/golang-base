@@ -1,0 +1,63 @@
+linters-settings:
+    errcheck:
+        check-type-assertions: true
+    goconst:
+        min-len: 2
+        min-occurrences: 3
+    gocritic:
+        enabled-tags:
+            - diagnostic
+            - experimental
+            - opinionated
+            - performance
+            - style
+    goimports:
+        local-prefixes: github.com/droomlabs/drm-coupon
+        e: true
+        d: true
+    gofmt:
+        e: true
+        d: true
+        s: true
+    structcheck:
+        fast: true
+        auto-fix: false
+    varnamelen:
+        ignore-decls:
+            - w http.ResponseWriter
+            - r *http.Request
+    wrapcheck:
+        ignoreSigs:
+            - .Errorf(
+            - errors.New(
+            - errors.Unwrap(
+            - .Wrap(
+            - .Wrapf(
+            - .WithMessage(
+            - .WithMessagef(
+            - .WithStack(
+            - .NewRequestError(
+    gomnd:
+        settings:
+            mnd:
+                # don't include the "operation" and "assign" checks
+                checks: [argument, case, condition, return]
+    govet:
+        check-shadowing: true
+    nolintlint:
+        require-explanation: true
+        require-specific: true
+
+linters:
+    enable-all: true
+    disable:
+        - maligned
+        - scopelint
+        - golint
+        - interfacer
+        - exhaustivestruct
+        - gci
+        # - goerr113
+
+run:
+    issues-exit-code: 1

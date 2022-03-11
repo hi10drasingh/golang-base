@@ -7,42 +7,41 @@ import (
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
-// PublishConfig holds config for publish
+// PublishConfig holds config for publish.
 type PublishConfig struct {
 	Exchange string
 	Key      string
 	Msg      amqp.Publishing
 }
 
-// Publish will send the provided msg to provided exchange
-// It also awk
-func (rq *RabbitMQ) Publish(ctx context.Context, publishConfig PublishConfig) (err error) {
+// Publish will send the provided msg to provided exchange.
+// It also acknowledge the publish.
+func (rq *RabbitMQ) Publish(ctx context.Context, publishConfig *PublishConfig) (err error) {
 	err = rq.CheckEnabled()
 
 	if err != nil {
-		return errors.Wrap(err, "Publish Error")
+		return errors.Wrap(err, "Queue Publish")
 	}
 
 	err = rq.Connect()
 
 	if err != nil {
-		return errors.Wrap(err, "Publish Error")
+		return errors.Wrap(err, "Queue Publish")
 	}
 
 	defer func() {
-		err = rq.Close()
-		if err != nil {
-			err = errors.Wrap(err, "Publish Error")
+		if er := rq.Close(); er != nil {
+			err = errors.Wrap(er, "Queue Publish")
 		}
 	}()
 
 	if err != nil {
-		return errors.Wrap(err, "Queue Declare Error")
+		return errors.Wrap(err, "Queue Publish")
 	}
 
 	// Confirming if published
-	if err := rq.Chan.Confirm(false); err != nil {
-		return errors.Wrap(err, "Confirm Published")
+	if err = rq.Chan.Confirm(false); err != nil {
+		return errors.Wrap(err, "Queue Publish")
 	}
 
 	confirms := rq.Chan.NotifyPublish(make(chan amqp.Confirmation, 1))
@@ -57,11 +56,7 @@ func (rq *RabbitMQ) Publish(ctx context.Context, publishConfig PublishConfig) (e
 		publishConfig.Msg,
 	)
 
-	if err != nil {
-		return errors.Wrap(err, "Queue Publish Error")
-	}
-
-	return
+	return errors.Wrap(err, "Queue Publish")
 }
 
 func (rq *RabbitMQ) confirmOne(ctx context.Context, confirms <-chan amqp.Confirmation) {

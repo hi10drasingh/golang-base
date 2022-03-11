@@ -4,7 +4,7 @@ import "net/http"
 
 const code = "success"
 
-// Response hold succes response data
+// Response hold succes response data.
 type Response struct {
 	Code       string      `json:"code"`
 	Data       interface{} `json:"data"`
@@ -13,7 +13,7 @@ type Response struct {
 }
 
 // NewResponse returns new Response struct
-// which will contain data and message string
+// which will contain data and message string.
 func NewResponse(data interface{}, message string) Response {
 	return Response{
 		Code:       code,

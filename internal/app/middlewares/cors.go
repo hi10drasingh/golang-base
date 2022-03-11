@@ -8,12 +8,12 @@ import (
 	"github.com/droomlab/drm-coupon/internal/app"
 )
 
-// CORS will allow access origin with .droom.in
+// CORS will allow access origin with "*.droom.in".
 func CORS() app.Middleware {
 	allowedHeaders := "Accept, Content-Type, Content-Length, Accept-Encoding, Authorization,X-CSRF-Token"
-	m := func(handler app.Handler) app.Handler {
 
-		h := func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
+	middleware := func(next app.Handler) app.Handler {
+		handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 			if origin := r.Header.Get("Origin"); strings.Contains(origin, ".droom.in") {
 				w.Header().Set("Access-Control-Allow-Origin", "*")
 				w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
@@ -21,11 +21,11 @@ func CORS() app.Middleware {
 				w.Header().Set("Access-Control-Expose-Headers", "Authorization")
 			}
 
-			return handler(ctx, w, r)
+			return next(ctx, w, r)
 		}
 
-		return h
+		return handler
 	}
 
-	return m
+	return middleware
 }

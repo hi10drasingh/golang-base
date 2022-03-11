@@ -2,28 +2,29 @@ package middlewares
 
 import (
 	"context"
-	"errors"
 	"net/http"
 
 	"github.com/droomlab/drm-coupon/internal/app"
-
-	drmerrors "github.com/droomlab/drm-coupon/internal/app/response/error"
+	drmerror "github.com/droomlab/drm-coupon/internal/app/response/error"
 )
 
 // CheckMethod provide reuqest method checking for
-// default ServeMux handler
+// default ServeMux handler.
 func CheckMethod(method string) app.Middleware {
-	m := func(handler app.Handler) app.Handler {
-
-		h := func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
+	middleware := func(next app.Handler) app.Handler {
+		handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request) error {
 			if method != r.Method {
-				return drmerrors.NewRequestError(errors.New("testing error method"), drmerrors.StatusMethodNotAllowed, drmerrors.StatusText(drmerrors.StatusMethodNotAllowed))
+				code := drmerror.StatusMethodNotAllowed
+				msg := drmerror.StatusMethodNotAllowedMsg
+
+				return drmerror.NewRequestError(nil, code, msg)
 			}
-			return handler(ctx, w, r)
+
+			return next(ctx, w, r)
 		}
 
-		return h
+		return handler
 	}
 
-	return m
+	return middleware
 }
