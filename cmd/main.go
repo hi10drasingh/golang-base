@@ -6,17 +6,17 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
 	"github.com/droomlab/drm-coupon/internal/app/handlers"
 	"github.com/droomlab/drm-coupon/internal/app/server"
+	"github.com/droomlab/drm-coupon/pkg/drmlog"
 	"github.com/pkg/errors"
 )
 
 func main() {
+	logger := drmlog.NewConsoleLogger()
 	if err := run(); err != nil {
-		fmt.Fprintf(os.Stderr, "%s\n", err)
-		os.Exit(1)
+		logger.Fatal(context.Background(), err, "Main Error")
 	}
 }
 
@@ -61,7 +61,7 @@ func run() (err error) {
 		dependencies.Log.Infof(context.Background(), "app : Start shutdown | signal : %v", sig)
 
 		// give outstanding requests a deadline for completion.
-		timeout := time.Duration(dependencies.Config.HTTP.ShutdownTimeout)
+		timeout := dependencies.Config.HTTP.ShutdownTimeout.Time
 		ctx, cancel := context.WithTimeout(context.Background(), timeout)
 
 		defer cancel()

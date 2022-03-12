@@ -2,7 +2,6 @@ package drmnosql
 
 import (
 	"context"
-	"time"
 
 	"github.com/droomlab/drm-coupon/internal/config"
 	"github.com/droomlab/drm-coupon/pkg/drmlog"
@@ -20,7 +19,7 @@ type Config struct {
 // GetDB open and pings connection to provided databases
 // and return pointer DB struct with errors.
 func GetDB(conf *Config) (*mongo.Client, error) {
-	connectionTimeout := time.Duration(conf.MongoConfig.ConnectionTimeout)
+	connectionTimeout := conf.MongoConfig.ConnectionTimeout.Time
 
 	clientOpts := options.Client()
 	clientOpts = clientOpts.SetHosts(conf.MongoConfig.Hosts).SetAuth(options.Credential{

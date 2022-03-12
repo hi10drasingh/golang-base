@@ -13,7 +13,9 @@ import (
 const directory = "config"
 
 type (
-	customTime time.Duration
+	CustomTime struct {
+		Time time.Duration
+	}
 
 	// App holds application level configuration.
 	App struct {
@@ -33,7 +35,7 @@ type (
 		User              string     `json:"user"`
 		Password          string     `json:"password"`
 		DB                string     `json:"db"`
-		ConnectionTimeout customTime `json:"connectionTimeout"`
+		ConnectionTimeout CustomTime `json:"connectionTimeout"`
 	}
 
 	// SQLConnConfig holds authentication details for a single sql server.
@@ -46,16 +48,19 @@ type (
 	}
 
 	// SQLConfig holds auth details of all servers.
-	SQLConfig []SQLConnConfig
+	SQLConfig struct {
+		Servers           []SQLConnConfig `json:"servers"`
+		ConnectionTimeout CustomTime      `json:"connectionTimeout"`
+	}
 
 	// HTTPConfig holds configuration for HTTP server.
 	HTTPConfig struct {
 		Host               string     `json:"host"`
 		Port               int        `json:"port"`
-		ReadTimeout        customTime `json:"readTimeout"`
-		WriteTimeout       customTime `json:"writeTimeout"`
-		IdleTimeout        customTime `json:"idleTimeout"`
-		ShutdownTimeout    customTime `json:"shutdownTimeout"`
+		ReadTimeout        CustomTime `json:"readTimeout"`
+		WriteTimeout       CustomTime `json:"writeTimeout"`
+		IdleTimeout        CustomTime `json:"idleTimeout"`
+		ShutdownTimeout    CustomTime `json:"shutdownTimeout"`
 		MaxHeaderMegabytes int        `json:"maxHeaderMegaBytes"`
 	}
 
@@ -72,16 +77,16 @@ type (
 		User     string     `json:"user"`
 		Password string     `json:"password"`
 		Vhost    string     `json:"vhost"`
-		Timeout  customTime `json:"timeout"`
+		Timeout  CustomTime `json:"timeout"`
 		Enabled  bool       `json:"enabled"`
 	}
 )
 
 // Custom unmarshaling for timr in string.
-func (c *customTime) UnmarshalJSON(data []byte) error {
+func (ct *CustomTime) UnmarshalJSON(data []byte) (err error) {
 	var tmp string
 
-	if err := json.Unmarshal(data, &tmp); err != nil {
+	if err = json.Unmarshal(data, &tmp); err != nil {
 		return errors.Wrap(err, "Custom Time Unmarshal")
 	}
 
@@ -90,7 +95,7 @@ func (c *customTime) UnmarshalJSON(data []byte) error {
 		return errors.Wrap(err, "Custom Time Unmarshal")
 	}
 
-	*c = customTime(dur)
+	ct.Time = dur
 
 	return errors.Wrap(err, "Custom Time Unmarshal")
 }

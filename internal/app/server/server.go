@@ -3,7 +3,6 @@ package server
 import (
 	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/droomlab/drm-coupon/pkg/drmlog"
 )
@@ -13,9 +12,9 @@ func New(handler http.Handler, deps *Dependencies) *http.Server {
 	return &http.Server{
 		Addr:           ":" + fmt.Sprintf("%v", deps.Config.HTTP.Port),
 		Handler:        handler,
-		ReadTimeout:    time.Duration(deps.Config.HTTP.ReadTimeout),
-		WriteTimeout:   time.Duration(deps.Config.HTTP.WriteTimeout),
-		IdleTimeout:    time.Duration(deps.Config.HTTP.IdleTimeout),
+		ReadTimeout:    deps.Config.HTTP.ReadTimeout.Time,
+		WriteTimeout:   deps.Config.HTTP.WriteTimeout.Time,
+		IdleTimeout:    deps.Config.HTTP.IdleTimeout.Time,
 		MaxHeaderBytes: deps.Config.HTTP.MaxHeaderMegabytes << 20,
 		ErrorLog:       drmlog.NewServerLogger(deps.Log),
 	}

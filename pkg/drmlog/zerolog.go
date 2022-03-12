@@ -138,3 +138,11 @@ func (ew *errorWriter) Write(p []byte) (int, error) {
 func NewServerLogger(logger Logger) *glog.Logger {
 	return glog.New(&errorWriter{logger}, "" /* prefix */, 0 /* flags */)
 }
+
+func NewConsoleLogger() *Log {
+	consoleLogger := zerolog.New(os.Stderr).With().Timestamp().Logger()
+
+	consoleLogger = consoleLogger.Output(zerolog.ConsoleWriter{Out: os.Stderr})
+
+	return &Log{&consoleLogger}
+}

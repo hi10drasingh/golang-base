@@ -21,22 +21,25 @@
         "password": "profsnapeisdon",
         "user": "root"
     },
-    "mysql": [
-        {
-            "db": "cscart_new",
-            "host": "dev1.droom.in",
-            "password": "profsnapeisdon",
-            "port": 3306,
-            "user": "root"
-        },
-        {
-            "db": "cscart_new",
-            "host": "dev1.droom.in",
-            "password": "profsnapeisdon",
-            "port": 3306,
-            "user": "root"
-        }
-    ],
+    "mysql": {
+        "servers": [
+            {
+                "db": "cscart_new",
+                "host": "dev1.droom.in",
+                "password": "profsnapeisdon",
+                "port": 3306,
+                "user": "root"
+            },
+            {
+                "db": "cscart_new",
+                "host": "dev1.droom.in",
+                "password": "profsnapeisdon",
+                "port": 3306,
+                "user": "root"
+            }
+        ],
+        "connectionTimeout": "1s"
+    },
     "rabbitmq": {
         "enabled": true,
         "host": "dev1.droom.in",

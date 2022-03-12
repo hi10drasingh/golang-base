@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"net"
-	"time"
 
 	"github.com/droomlab/drm-coupon/internal/config"
 	"github.com/droomlab/drm-coupon/pkg/drmlog"
@@ -52,7 +51,7 @@ func (rq *RabbitMQ) CheckEnabled() error {
 
 // Connect connects to amqp server.
 func (rq *RabbitMQ) Connect() (err error) {
-	connectionTimeout := time.Duration(rq.RMQConfig.Timeout)
+	connectionTimeout := rq.RMQConfig.Timeout.Time
 
 	address := fmt.Sprintf("amqp://%s:%s@%s:%d",
 		rq.RMQConfig.User,

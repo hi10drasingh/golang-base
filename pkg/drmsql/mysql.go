@@ -3,6 +3,7 @@ package drmsql
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/droomlab/drm-coupon/internal/config"
 	"github.com/droomlab/drm-coupon/pkg/drmlog"
@@ -22,7 +23,7 @@ type Config struct {
 // GetDB open and pings connection to provided databases
 // and return pointer DB struct with errors.
 func GetDB(conf *Config) (*nap.DB, error) {
-	dsns := getDataSourceName(conf.SQLConfig)
+	dsns := getDataSourceName(conf.SQLConfig.Servers, conf.SQLConfig.ConnectionTimeout.Time)
 
 	database, err := nap.Open("mysql", dsns)
 	if err != nil {
@@ -38,19 +39,22 @@ func GetDB(conf *Config) (*nap.DB, error) {
 	return database, nil
 }
 
-func getDataSourceName(conf config.SQLConfig) (dsns string) {
+func getDataSourceName(servers []config.SQLConnConfig, timeout time.Duration) (dsns string) {
 	var (
-		DBConf = conf[0]
+		DBConf = servers[0]
 		index  int
+		format = "%s:%s@tcp(%s:%d)/%s?timeout=%s"
 	)
 
-	for index = 0; index < len(conf)-1; {
-		dsns += fmt.Sprintf("%s:%s@tcp(%s:%d)/%s;", DBConf.User, DBConf.Password, DBConf.Host, DBConf.Port, DBConf.DB)
-		DBConf = conf[index]
+	for index = 0; index < len(servers)-1; {
+		dsns += fmt.Sprintf(format+";", DBConf.User, DBConf.Password, DBConf.Host, DBConf.Port, DBConf.DB, timeout.String())
+
+		DBConf = servers[index]
+
 		index++
 	}
 
-	dsns += fmt.Sprintf("%s:%s@tcp(%s:%d)/%s", DBConf.User, DBConf.Password, DBConf.Host, DBConf.Port, DBConf.DB)
+	dsns += fmt.Sprintf(format, DBConf.User, DBConf.Password, DBConf.Host, DBConf.Port, DBConf.DB, timeout.String())
 
 	return dsns
 }
