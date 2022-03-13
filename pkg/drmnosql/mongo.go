@@ -23,9 +23,9 @@ func GetDB(conf *Config) (*mongo.Client, error) {
 
 	clientOpts := options.Client()
 	clientOpts = clientOpts.SetHosts(conf.MongoConfig.Hosts).SetAuth(options.Credential{
-		Username:   conf.MongoConfig.User,
-		Password:   conf.MongoConfig.Password,
-		AuthSource: conf.MongoConfig.AuthSource,
+		Username: conf.MongoConfig.User,
+		Password: conf.MongoConfig.Password,
+		// AuthSource: conf.MongoConfig.AuthSource,
 	}).SetConnectTimeout(connectionTimeout)
 
 	ctx, cancel := context.WithTimeout(context.Background(), connectionTimeout)
