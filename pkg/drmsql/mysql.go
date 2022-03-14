@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/droomlab/drm-coupon/internal/config"
 	"github.com/droomlab/drm-coupon/pkg/drmlog"
+	"github.com/droomlab/drm-coupon/pkg/drmtime"
 	"github.com/pkg/errors"
 	"github.com/tsenart/nap"
 
@@ -14,16 +14,25 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-// Config holds init dependencies for New DB.
+// ConnConfig holds authentication details for a single sql server.
+type ConnConfig struct {
+	Host     string `json:"host" validate:"required"`
+	Port     int    `json:"port" validate:"required,number"`
+	User     string `json:"user" validate:"required"`
+	Password string `json:"password" validate:"required"`
+	DB       string `json:"db" validate:"required"`
+}
+
+// Config holds auth details of all servers.
 type Config struct {
-	SQLConfig config.SQLConfig
-	Log       drmlog.Logger
+	Servers           []ConnConfig       `json:"servers" validate:"required"`
+	ConnectionTimeout drmtime.CustomTime `json:"connectionTimeout" validate:"required"`
 }
 
 // GetDB open and pings connection to provided databases
 // and return pointer DB struct with errors.
-func GetDB(conf *Config) (*nap.DB, error) {
-	dsns := getDataSourceName(conf.SQLConfig.Servers, conf.SQLConfig.ConnectionTimeout.Time)
+func GetDB(conf *Config, log drmlog.Logger) (*nap.DB, error) {
+	dsns := getDataSourceName(conf.Servers, conf.ConnectionTimeout.Time)
 
 	database, err := nap.Open("mysql", dsns)
 	if err != nil {
@@ -34,12 +43,12 @@ func GetDB(conf *Config) (*nap.DB, error) {
 		return nil, errors.Wrap(err, "SQL Database Connection Testing")
 	}
 
-	conf.Log.Info(context.Background(), "SQl Database Connection Tested")
+	log.Debug(context.Background(), "SQl Database Connection Tested")
 
 	return database, nil
 }
 
-func getDataSourceName(servers []config.SQLConnConfig, timeout time.Duration) (dsns string) {
+func getDataSourceName(servers []ConnConfig, timeout time.Duration) (dsns string) {
 	var (
 		DBConf = servers[0]
 		index  int

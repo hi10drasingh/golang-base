@@ -5,22 +5,33 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/droomlab/drm-coupon/internal/config"
 	"github.com/droomlab/drm-coupon/pkg/drmlog"
+	"github.com/droomlab/drm-coupon/pkg/drmtime"
 	"github.com/pkg/errors"
 	amqp "github.com/rabbitmq/amqp091-go"
 )
+
+// Config holds conf fro amqp server.
+type Config struct {
+	Host     string             `json:"host" validate:"required"`
+	Port     int                `json:"port" validate:"required,number"`
+	User     string             `json:"user" validate:"required"`
+	Password string             `json:"password" validate:"required"`
+	Vhost    string             `json:"vhost" validate:"required"`
+	Timeout  drmtime.CustomTime `json:"timeout" validate:"required"`
+	Enabled  bool               `json:"enabled"`
+}
 
 // RabbitMQ struct contains Connection & Channel.
 type RabbitMQ struct {
 	Connection *amqp.Connection
 	Chan       *amqp.Channel
-	RMQConfig  *config.RabbitMQConfig
+	RMQConfig  *Config
 	Log        drmlog.Logger
 }
 
 // NewRabbitMQ return new instance of RabbitMQ Struct.
-func NewRabbitMQ(conf *config.RabbitMQConfig, log drmlog.Logger) (*RabbitMQ, error) {
+func NewRabbitMQ(conf *Config, log drmlog.Logger) (*RabbitMQ, error) {
 	rmq := RabbitMQ{
 		Connection: nil,
 		Chan:       nil,

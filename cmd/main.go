@@ -7,6 +7,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/droomlab/drm-coupon/internal/app/dependency"
 	"github.com/droomlab/drm-coupon/internal/app/handlers"
 	"github.com/droomlab/drm-coupon/internal/app/server"
 	"github.com/droomlab/drm-coupon/pkg/drmlog"
@@ -22,7 +23,7 @@ func main() {
 
 // Run the http server.
 func run() (err error) {
-	dependencies, err := server.Init()
+	dependencies, err := dependency.Init()
 	if err != nil {
 		return errors.Wrap(err, "Initializing dependencies")
 	}
@@ -42,7 +43,7 @@ func run() (err error) {
 		Deps:     dependencies,
 	})
 
-	srv := server.New(app, dependencies)
+	srv := server.New(app, &dependencies.Config.HTTP, dependencies.Log)
 
 	// channel to listen for errors coming from the listener.
 	serverErrors := make(chan error, 1)

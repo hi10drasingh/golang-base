@@ -1,4 +1,4 @@
-package server
+package dependency
 
 import (
 	"context"
@@ -14,7 +14,7 @@ import (
 )
 
 // Server struct holds all server level dependencies.
-type Dependencies struct {
+type Dependency struct {
 	Config *config.App
 	Log    drmlog.Logger
 	SQL    *nap.DB
@@ -23,31 +23,23 @@ type Dependencies struct {
 }
 
 // Init initialized global dependencies.
-func Init() (*Dependencies, error) {
+func Init() (*Dependency, error) {
 	conf, err := config.Load()
 	if err != nil {
 		return nil, errors.Wrap(err, "Config Initialize")
 	}
 
-	log, err := drmlog.NewZeroLogger(drmlog.Config{
-		LogConfig: conf.Log,
-	})
+	log, err := drmlog.NewZeroLogger(conf.Log)
 	if err != nil {
 		return nil, errors.Wrap(err, "Log Initialize")
 	}
 
-	sqldb, err := drmsql.GetDB(&drmsql.Config{
-		SQLConfig: conf.Mysql,
-		Log:       log,
-	})
+	sqldb, err := drmsql.GetDB(&conf.Mysql, log)
 	if err != nil {
 		return nil, errors.Wrap(err, "SQL DB Initialize")
 	}
 
-	nosqldb, err := drmnosql.GetDB(&drmnosql.Config{
-		MongoConfig: conf.Mongo,
-		Log:         log,
-	})
+	nosqldb, err := drmnosql.GetDB(&conf.Mongo, log)
 	if err != nil {
 		return nil, errors.Wrap(err, "NoSQL DB Initialize")
 	}
@@ -57,7 +49,7 @@ func Init() (*Dependencies, error) {
 		return nil, errors.Wrap(err, "RabbitMQ Initialize")
 	}
 
-	return &Dependencies{
+	return &Dependency{
 		Config: conf,
 		Log:    log,
 		SQL:    sqldb,
@@ -67,7 +59,7 @@ func Init() (*Dependencies, error) {
 }
 
 // Close closes all global dependencies.
-func (d *Dependencies) Close() error {
+func (d *Dependency) Close() error {
 	// Close SQL
 	err := d.SQL.Close()
 	if err != nil {

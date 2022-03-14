@@ -7,15 +7,15 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/droomlab/drm-coupon/internal/app"
+	"github.com/droomlab/drm-coupon/internal/app/dependency"
 	"github.com/droomlab/drm-coupon/internal/app/handlers/v1/testgrp"
 	"github.com/droomlab/drm-coupon/internal/app/middlewares"
 	drmerror "github.com/droomlab/drm-coupon/internal/app/response/error"
 	drmsucces "github.com/droomlab/drm-coupon/internal/app/response/success"
-	"github.com/droomlab/drm-coupon/internal/app/server"
 )
 
 // Routes register routes.
-func Routes(globalHandl *app.App, deps *server.Dependencies) {
+func Routes(globalHandl *app.App, deps *dependency.Dependency) {
 	const version = "v1"
 
 	tgh := testgrp.NewHandlers(deps)

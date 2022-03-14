@@ -5,8 +5,12 @@ import (
 	"flag"
 	"os"
 	"path/filepath"
-	"time"
 
+	"github.com/droomlab/drm-coupon/internal/app/server"
+	"github.com/droomlab/drm-coupon/pkg/drmlog"
+	"github.com/droomlab/drm-coupon/pkg/drmnosql"
+	"github.com/droomlab/drm-coupon/pkg/drmrmq"
+	"github.com/droomlab/drm-coupon/pkg/drmsql"
 	"github.com/pkg/errors"
 
 	"github.com/go-playground/validator/v10"
@@ -18,92 +22,17 @@ const (
 )
 
 type (
-	CustomTime struct {
-		Time time.Duration `validate:"required"`
-	}
-
 	// App holds application level configuration.
 	App struct {
-		Env      string         `json:"env" validate:"required"`
-		Debug    string         `json:"debug" validate:"required,boolean"`
-		HTTP     HTTPConfig     `json:"http" validate:"required"`
-		Mysql    SQLConfig      `json:"mysql" validate:"required"`
-		Mongo    MongoConfig    `json:"mongo" validate:"required"`
-		Log      LogConfig      `json:"log" validate:"required"`
-		RabbitMQ RabbitMQConfig `json:"rabbitmq" validate:"required"`
-	}
-
-	// MongoConfig holds connection details of mongo server.
-	MongoConfig struct {
-		// AuthSource        string     `json:"authSource" validate:"required"`
-		Hosts             []string   `json:"hosts" validate:"required"`
-		User              string     `json:"user" validate:"required"`
-		Password          string     `json:"password" validate:"required"`
-		DB                string     `json:"db" validate:"required"`
-		ConnectionTimeout CustomTime `json:"connectionTimeout" validate:"required"`
-	}
-
-	// SQLConnConfig holds authentication details for a single sql server.
-	SQLConnConfig struct {
-		Host     string `json:"host" validate:"required"`
-		Port     int    `json:"port" validate:"required,number"`
-		User     string `json:"user" validate:"required"`
-		Password string `json:"password" validate:"required"`
-		DB       string `json:"db" validate:"required"`
-	}
-
-	// SQLConfig holds auth details of all servers.
-	SQLConfig struct {
-		Servers           []SQLConnConfig `json:"servers" validate:"required"`
-		ConnectionTimeout CustomTime      `json:"connectionTimeout" validate:"required"`
-	}
-
-	// HTTPConfig holds configuration for HTTP server.
-	HTTPConfig struct {
-		// Host               string     `json:"host" validate:"required"`
-		Port               int        `json:"port" validate:"required,number"`
-		ReadTimeout        CustomTime `json:"readTimeout" validate:"required"`
-		WriteTimeout       CustomTime `json:"writeTimeout" validate:"required"`
-		IdleTimeout        CustomTime `json:"idleTimeout" validate:"required"`
-		ShutdownTimeout    CustomTime `json:"shutdownTimeout" validate:"required"`
-		MaxHeaderMegabytes int        `json:"maxHeaderMegaBytes" validate:"required,number"`
-	}
-
-	// LogConfig holds configuration for logger.
-	LogConfig struct {
-		Dir   string `json:"dir" validate:"required"`
-		Level int    `json:"level" validate:"number"`
-	}
-
-	// RabbitMQConfig holds conf fro amqp server.
-	RabbitMQConfig struct {
-		Host     string     `json:"host" validate:"required"`
-		Port     int        `json:"port" validate:"required,number"`
-		User     string     `json:"user" validate:"required"`
-		Password string     `json:"password" validate:"required"`
-		Vhost    string     `json:"vhost" validate:"required"`
-		Timeout  CustomTime `json:"timeout" validate:"required"`
-		Enabled  bool       `json:"enabled"`
+		Env      string          `json:"env" validate:"required"`
+		Debug    string          `json:"debug" validate:"required,boolean"`
+		HTTP     server.Config   `json:"http" validate:"required"`
+		Mysql    drmsql.Config   `json:"mysql" validate:"required"`
+		Mongo    drmnosql.Config `json:"mongo" validate:"required"`
+		Log      drmlog.Config   `json:"log" validate:"required"`
+		RabbitMQ drmrmq.Config   `json:"rabbitmq" validate:"required"`
 	}
 )
-
-// Custom unmarshaling for timr in string.
-func (ct *CustomTime) UnmarshalJSON(data []byte) (err error) {
-	var tmp string
-
-	if err = json.Unmarshal(data, &tmp); err != nil {
-		return errors.Wrap(err, "Custom Time Unmarshal")
-	}
-
-	dur, err := time.ParseDuration(tmp)
-	if err != nil {
-		return errors.Wrap(err, "Custom Time Unmarshal")
-	}
-
-	ct.Time = dur
-
-	return errors.Wrap(err, "Custom Time Unmarshal")
-}
 
 func getEnvironment() string {
 	env := defaultEnv

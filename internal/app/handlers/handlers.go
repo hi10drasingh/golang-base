@@ -5,15 +5,15 @@ import (
 	"os"
 
 	"github.com/droomlab/drm-coupon/internal/app"
+	"github.com/droomlab/drm-coupon/internal/app/dependency"
 	v1 "github.com/droomlab/drm-coupon/internal/app/handlers/v1"
 	"github.com/droomlab/drm-coupon/internal/app/middlewares"
-	"github.com/droomlab/drm-coupon/internal/app/server"
 )
 
 // Config holds global dependencies for handler.
 type Config struct {
 	Shutdown chan os.Signal
-	Deps     *server.Dependencies
+	Deps     *dependency.Dependency
 }
 
 // NewHandlers return new instance of handler.

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/droomlab/drm-coupon/internal/app/server"
+	"github.com/droomlab/drm-coupon/internal/app/dependency"
 	"github.com/droomlab/drm-coupon/pkg/drmlog"
 	"github.com/droomlab/drm-coupon/pkg/drmrmq"
 	"github.com/tsenart/nap"
@@ -22,7 +22,7 @@ type Handlers struct {
 }
 
 // NewHandlers return new instance of handler.
-func NewHandlers(deps *server.Dependencies) *Handlers {
+func NewHandlers(deps *dependency.Dependency) *Handlers {
 	return &Handlers{
 		Slug:  "test",
 		Log:   deps.Log,

@@ -22,6 +22,7 @@
         "user": "root"
     },
     "mysql": {
+        "connectionTimeout": "1s",
         "servers": [
             {
                 "db": "cscart_new",
@@ -37,8 +38,7 @@
                 "port": 3306,
                 "user": "root"
             }
-        ],
-        "connectionTimeout": "1s"
+        ]
     },
     "rabbitmq": {
         "enabled": true,

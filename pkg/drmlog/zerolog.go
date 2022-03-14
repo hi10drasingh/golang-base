@@ -7,7 +7,6 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/droomlab/drm-coupon/internal/config"
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/pkgerrors"
@@ -25,13 +24,15 @@ type Logger interface {
 	Debug(ctx context.Context, msg string)
 }
 
-const readWritePerm = 0o666
+const readWritePerm = 666
 
-// Config holds init dependencies for New Logger.
+// Config holds configuration for logger.
 type Config struct {
-	LogConfig config.LogConfig
+	Dir   string `json:"dir" validate:"required"`
+	Level int    `json:"level" validate:"number"`
 }
 
+// Log hold logger object.
 type Log struct {
 	Logger *zerolog.Logger
 }
@@ -102,12 +103,12 @@ func (lw *levelWriter) Close() error {
 func NewZeroLogger(conf Config) (*Log, error) {
 	zerolog.ErrorStackMarshaler = pkgerrors.MarshalStack
 
-	lvlWriter, err := newLevelWriter(conf.LogConfig.Dir+"/app.log", conf.LogConfig.Dir+"/error.log")
+	lvlWriter, err := newLevelWriter(conf.Dir+"/app.log", conf.Dir+"/error.log")
 	if err != nil {
 		return nil, errors.Wrap(err, "New LevelWriter")
 	}
 
-	logWriter := zerolog.New(lvlWriter).Level(zerolog.Level(conf.LogConfig.Level))
+	logWriter := zerolog.New(lvlWriter).Level(zerolog.Level(conf.Level))
 	logWriter = logWriter.With().CallerWithSkipFrameCount(zerolog.CallerSkipFrameCount + 1).Timestamp().Logger()
 
 	return &Log{&logWriter}, nil

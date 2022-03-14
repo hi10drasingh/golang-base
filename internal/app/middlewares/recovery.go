@@ -2,6 +2,7 @@ package middlewares
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"runtime/debug"
@@ -11,6 +12,8 @@ import (
 	"github.com/droomlab/drm-coupon/internal/app"
 )
 
+var ErrPanic = errors.New("PANIC")
+
 // Recovery provides panic handling for application.
 func Recovery(log drmlog.Logger) app.Middleware {
 	middleware := func(next app.Handler) app.Handler {
@@ -19,7 +22,7 @@ func Recovery(log drmlog.Logger) app.Middleware {
 				if rec := recover(); rec != nil {
 					trace := debug.Stack()
 
-					err = fmt.Errorf("PANIC [%v] TRACE[%s]", rec, string(trace))
+					err = fmt.Errorf("PANIC [%v] TRACE[%s]: %w", rec, string(trace), ErrPanic)
 				}
 			}()
 
