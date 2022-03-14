@@ -22,7 +22,7 @@ func Recovery(log drmlog.Logger) app.Middleware {
 				if rec := recover(); rec != nil {
 					trace := debug.Stack()
 
-					err = fmt.Errorf("PANIC [%v] TRACE[%s]: %w", rec, string(trace), ErrPanic)
+					err = fmt.Errorf("[%v] TRACE[%s]: %w", rec, string(trace), ErrPanic)
 				}
 			}()
 
