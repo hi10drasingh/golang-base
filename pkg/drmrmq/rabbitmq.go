@@ -24,55 +24,41 @@ type Config struct {
 
 // RabbitMQ struct contains Connection & Channel.
 type RabbitMQ struct {
-	Connection *amqp.Connection
-	Chan       *amqp.Channel
-	RMQConfig  *Config
-	Log        drmlog.Logger
+	conn      *amqp.Connection
+	rmqConfig *Config
+	log       drmlog.Logger
 }
 
 // NewRabbitMQ return new instance of RabbitMQ Struct.
 func NewRabbitMQ(conf *Config, log drmlog.Logger) (*RabbitMQ, error) {
 	rmq := RabbitMQ{
-		Connection: nil,
-		Chan:       nil,
-		RMQConfig:  conf,
-		Log:        log,
+		conn:      nil,
+		rmqConfig: conf,
+		log:       log,
 	}
 
-	err := rmq.Connect()
-	if err != nil {
-		return nil, errors.Wrap(err, "RabbitMQ Channel Conenct")
+	if err := rmq.Connect(); err != nil {
+		return nil, errors.Wrap(err, "RabbitMQ Conenct")
 	}
 
-	log.Info(context.Background(), "Rabbitmq Connection texted")
+	log.Info(context.Background(), "Rabbitmq connected")
 
-	err = rmq.Chan.Close()
-
-	return &rmq, errors.Wrap(err, "RabbitMQ Channel Close")
-}
-
-// CheckEnabled checks if rabbitmq is enabled.
-func (rq *RabbitMQ) CheckEnabled() error {
-	if !rq.RMQConfig.Enabled {
-		return errors.New("RabbitMQ is disabled")
-	}
-
-	return nil
+	return &rmq, nil
 }
 
 // Connect connects to amqp server.
 func (rq *RabbitMQ) Connect() (err error) {
-	connectionTimeout := rq.RMQConfig.Timeout.Time
+	connectionTimeout := rq.rmqConfig.Timeout.Time
 
 	address := fmt.Sprintf("amqp://%s:%s@%s:%d",
-		rq.RMQConfig.User,
-		rq.RMQConfig.Password,
-		rq.RMQConfig.Host,
-		rq.RMQConfig.Port,
+		rq.rmqConfig.User,
+		rq.rmqConfig.Password,
+		rq.rmqConfig.Host,
+		rq.rmqConfig.Port,
 	)
 
 	conn, err := amqp.DialConfig(address, amqp.Config{
-		Vhost: rq.RMQConfig.Vhost,
+		Vhost: rq.rmqConfig.Vhost,
 		Dial: func(network, addr string) (conn net.Conn, err error) {
 			conn, err = net.DialTimeout(network, addr, connectionTimeout)
 
@@ -83,30 +69,43 @@ func (rq *RabbitMQ) Connect() (err error) {
 		return errors.Wrap(err, "AMQP Open Connection")
 	}
 
-	rq.Connection = conn
+	rq.conn = conn
 
-	ch, err := rq.Connection.Channel()
-	if err != nil {
-		return errors.Wrap(err, "AMQP Open Channel")
-	}
+	go rq.handleBlocking()
 
-	rq.Chan = ch
+	go rq.handleClose()
 
-	return errors.Wrap(err, "AMQP Connect")
+	return nil
 }
 
 // Close closes all open connections.
 func (rq *RabbitMQ) Close() error {
-	err := rq.Chan.Close()
-	if err != nil {
-		return errors.Wrap(err, "RabbitMQ Channel Close")
-	}
-
-	err = rq.Connection.Close()
-
-	if err != nil {
+	if err := rq.conn.Close(); err != nil {
 		return errors.Wrap(err, "RabbitMQ Connection Close")
 	}
 
 	return nil
+}
+
+func (rq *RabbitMQ) handleBlocking() {
+	blockings := rq.conn.NotifyBlocked(make(chan amqp.Blocking))
+
+	for b := range blockings {
+		if b.Active {
+			rq.log.Infof(context.Background(), "AMPQ TCP Conn blocked: %q", b.Reason)
+		} else {
+			rq.log.Info(context.Background(), "AMPQ TCP Conn unblocked")
+		}
+	}
+}
+
+func (rq *RabbitMQ) handleClose() {
+	err := <-rq.conn.NotifyClose(make(chan *amqp.Error))
+
+	if err != nil && err.Server {
+		err := rq.Connect()
+		if err != nil {
+			rq.log.Error(context.Background(), err, "RMQ Connection Reconnect")
+		}
+	}
 }
