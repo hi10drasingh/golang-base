@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"os"
 	"syscall"
-	"time"
 
 	"github.com/droomlab/drm-coupon/internal/config"
 	"github.com/droomlab/drm-coupon/pkg/drmlog"
@@ -50,13 +49,6 @@ func (a *App) Handle(group, path string, handler Handler, middlewares ...Middlew
 
 	baseHandler := func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
-
-		v := Values{
-			Now:        time.Now().UTC(),
-			StatusCode: http.StatusAccepted,
-		}
-
-		ctx = context.WithValue(ctx, ctxkey, &v)
 
 		// If panic occurs in app
 		if err := handler(ctx, w, r); err != nil {

@@ -13,13 +13,14 @@ import (
 
 // Config holds conf fro amqp server.
 type Config struct {
-	Host     string             `json:"host" validate:"required"`
-	Port     int                `json:"port" validate:"required,number"`
-	User     string             `json:"user" validate:"required"`
-	Password string             `json:"password" validate:"required"`
-	Vhost    string             `json:"vhost" validate:"required"`
-	Timeout  drmtime.CustomTime `json:"timeout" validate:"required"`
-	Enabled  bool               `json:"enabled"`
+	Host      string             `json:"host" validate:"required"`
+	Port      int                `json:"port" validate:"required,number"`
+	User      string             `json:"user" validate:"required"`
+	Password  string             `json:"password" validate:"required"`
+	Vhost     string             `json:"vhost" validate:"required"`
+	Timeout   drmtime.CustomTime `json:"timeout" validate:"required"`
+	Heartbeat drmtime.CustomTime `json:"heartbeat" validate:"required"`
+	Enabled   bool               `json:"enabled"`
 }
 
 // RabbitMQ struct contains Connection & Channel.
@@ -41,7 +42,7 @@ func NewRabbitMQ(conf *Config, log drmlog.Logger) (*RabbitMQ, error) {
 		return nil, errors.Wrap(err, "RabbitMQ Conenct")
 	}
 
-	log.Info(context.Background(), "Rabbitmq connected")
+	log.Debug(context.Background(), "Rabbitmq connected")
 
 	return &rmq, nil
 }
@@ -58,7 +59,8 @@ func (rq *RabbitMQ) Connect() (err error) {
 	)
 
 	conn, err := amqp.DialConfig(address, amqp.Config{
-		Vhost: rq.rmqConfig.Vhost,
+		Vhost:     rq.rmqConfig.Vhost,
+		Heartbeat: rq.rmqConfig.Heartbeat.Time,
 		Dial: func(network, addr string) (conn net.Conn, err error) {
 			conn, err = net.DialTimeout(network, addr, connectionTimeout)
 
@@ -71,6 +73,14 @@ func (rq *RabbitMQ) Connect() (err error) {
 
 	rq.conn = conn
 
+	// testing channel
+	channel, err := conn.Channel()
+	if err != nil {
+		return errors.Wrap(err, "AMPQ Channel Creation")
+	}
+
+	defer channel.Close()
+
 	go rq.handleBlocking()
 
 	go rq.handleClose()
@@ -79,7 +89,7 @@ func (rq *RabbitMQ) Connect() (err error) {
 }
 
 // Close closes all open connections.
-func (rq *RabbitMQ) Close() error {
+func (rq *RabbitMQ) Close(ctx context.Context) error {
 	if err := rq.conn.Close(); err != nil {
 		return errors.Wrap(err, "RabbitMQ Connection Close")
 	}

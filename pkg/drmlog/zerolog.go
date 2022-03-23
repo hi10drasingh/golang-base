@@ -3,15 +3,17 @@ package drmlog
 import (
 	"context"
 	"io"
-	"io/fs"
 	glog "log"
 	"os"
 	"path/filepath"
 
+	"github.com/droomlab/drm-coupon/pkg/drmcontext"
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/pkgerrors"
 )
+
+const rwPerm = 0o644
 
 // Logger provides interface for logging library.
 type Logger interface {
@@ -27,46 +29,62 @@ type Logger interface {
 
 // Config holds configuration for logger.
 type Config struct {
-	Dir   string      `json:"dir" validate:"required"`
-	Level int         `json:"level" validate:"number"`
-	Perm  fs.FileMode `json:"perm" validate:"required"`
+	Dir   string `json:"dir" validate:"required"`
+	Level int    `json:"level" validate:"number"`
 }
 
 // Log hold logger object.
 type Log struct {
-	Logger *zerolog.Logger
+	Logger zerolog.Logger
 }
 
 func (l *Log) Errorf(ctx context.Context, err error, format string, args ...interface{}) {
+	l.withContext(ctx)
 	l.Logger.Error().Stack().Err(errors.WithStack(err)).Msgf(format, args...)
 }
 
 func (l *Log) Error(ctx context.Context, err error, msg string) {
+	l.withContext(ctx)
 	l.Logger.Error().Stack().Err(errors.WithStack(err)).Msg(msg)
 }
 
 func (l *Log) Fatalf(ctx context.Context, err error, format string, args ...interface{}) {
+	l.withContext(ctx)
 	l.Logger.Fatal().Stack().Err(errors.WithStack(err)).Msgf(format, args...)
 }
 
 func (l *Log) Fatal(ctx context.Context, err error, msg string) {
+	l.withContext(ctx)
 	l.Logger.Fatal().Stack().Err(errors.WithStack(err)).Msg(msg)
 }
 
 func (l *Log) Infof(ctx context.Context, format string, args ...interface{}) {
+	l.withContext(ctx)
 	l.Logger.Info().Msgf(format, args...)
 }
 
 func (l *Log) Info(ctx context.Context, msg string) {
+	l.withContext(ctx)
 	l.Logger.Info().Msg(msg)
 }
 
 func (l *Log) Debugf(ctx context.Context, format string, args ...interface{}) {
+	l.withContext(ctx)
 	l.Logger.Debug().Msgf(format, args...)
 }
 
 func (l *Log) Debug(ctx context.Context, msg string) {
+	l.withContext(ctx)
 	l.Logger.Debug().Msg(msg)
+}
+
+func (l *Log) withContext(ctx context.Context) {
+	reqIDValue, _ := drmcontext.RequestIDCtx(ctx)
+
+	// Adding request id
+	if reqIDValue != "" {
+		l.Logger = l.Logger.With().Str(drmcontext.ReqIDKey, reqIDValue).Logger()
+	}
 }
 
 type levelWriter struct {
@@ -103,24 +121,24 @@ func (lw *levelWriter) Close() error {
 func NewZeroLogger(conf Config) (*Log, error) {
 	zerolog.ErrorStackMarshaler = pkgerrors.MarshalStack
 
-	lvlWriter, err := newLevelWriter(conf.Dir+"/app.log", conf.Dir+"/error.log", conf.Perm)
+	lvlWriter, err := newLevelWriter(conf.Dir+"/app.log", conf.Dir+"/error.log")
 	if err != nil {
 		return nil, errors.Wrap(err, "New LevelWriter")
 	}
 
 	logWriter := zerolog.New(lvlWriter).Level(zerolog.Level(conf.Level))
-	logWriter = logWriter.With().CallerWithSkipFrameCount(zerolog.CallerSkipFrameCount + 1).Timestamp().Logger()
+	logWriter = logWriter.With().Timestamp().Logger()
 
-	return &Log{&logWriter}, nil
+	return &Log{logWriter}, nil
 }
 
-func newLevelWriter(appFile, errFile string, perm fs.FileMode) (*levelWriter, error) {
-	defaultWriter, err := os.OpenFile(filepath.Clean(appFile), os.O_APPEND|os.O_CREATE|os.O_WRONLY, perm)
+func newLevelWriter(appFile, errFile string) (*levelWriter, error) {
+	defaultWriter, err := os.OpenFile(filepath.Clean(appFile), os.O_APPEND|os.O_CREATE|os.O_WRONLY, rwPerm)
 	if err != nil {
 		return nil, errors.Wrap(err, "App Log File Open")
 	}
 
-	errorWriter, err := os.OpenFile(filepath.Clean(errFile), os.O_APPEND|os.O_CREATE|os.O_WRONLY, perm)
+	errorWriter, err := os.OpenFile(filepath.Clean(errFile), os.O_APPEND|os.O_CREATE|os.O_WRONLY, rwPerm)
 
 	return &levelWriter{defaultWriter, errorWriter}, errors.Wrap(err, "Error Log File Open")
 }
@@ -145,20 +163,18 @@ func NewConsoleLogger() *Log {
 
 	consoleLogger = consoleLogger.Output(zerolog.ConsoleWriter{Out: os.Stderr})
 
-	return &Log{&consoleLogger}
+	return &Log{consoleLogger}
 }
 
-func NewRequestLogger(conf Config) (zerolog.Logger, error) {
-	var logger zerolog.Logger
-
+func NewRequestLogger(conf Config) (*zerolog.Logger, error) {
 	accessFile := filepath.Clean(conf.Dir + "/access.log")
 
-	accessWriter, err := os.OpenFile(accessFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, conf.Perm)
+	accessWriter, err := os.OpenFile(accessFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, rwPerm)
 	if err != nil {
-		return logger, errors.Wrap(err, "Access Log File Open")
+		return nil, errors.Wrap(err, "Access Log File Open")
 	}
 
-	logger = zerolog.New(accessWriter).Level(zerolog.Level(conf.Level)).With().Timestamp().Logger()
+	logger := zerolog.New(accessWriter).Level(zerolog.Level(conf.Level)).With().Timestamp().Logger()
 
-	return logger, err
+	return &logger, nil
 }

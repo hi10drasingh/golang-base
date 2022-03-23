@@ -21,7 +21,7 @@ type Dependency struct {
 	SQL        *nap.DB
 	NoSQL      *mongo.Client
 	RMQ        *drmrmq.RabbitMQ
-	RequestLog zerolog.Logger
+	RequestLog *zerolog.Logger
 }
 
 // Init initialized global dependencies.
@@ -74,7 +74,7 @@ func (d *Dependency) Close() error {
 		return errors.Wrap(err, "SQL DB Close")
 	}
 
-	d.Log.Info(context.Background(), "SQL DB Closed")
+	d.Log.Debug(context.Background(), "SQL DB Closed")
 
 	// Close NoSQL
 	err = d.NoSQL.Disconnect(context.Background())
@@ -82,7 +82,15 @@ func (d *Dependency) Close() error {
 		return errors.Wrap(err, "NoSQL DB Close")
 	}
 
-	d.Log.Info(context.Background(), "NoSQL DB Closed")
+	d.Log.Debug(context.Background(), "NoSQL DB Closed")
+
+	// Close RMQ
+	err = d.RMQ.Close(context.Background())
+	if err != nil {
+		return errors.Wrap(err, "RMQ DB Close")
+	}
+
+	d.Log.Debug(context.Background(), "RMQ DB Closed")
 
 	return nil
 }

@@ -32,12 +32,12 @@ func (rq *RabbitMQ) NewPublisher(ctx context.Context) (*Publisher, error) {
 }
 
 func (pub *Publisher) channel(ctx context.Context) error {
-	channel, err := pub.rq.conn.Channel()
+	ch, err := pub.rq.conn.Channel()
 	if err != nil {
 		return errors.Wrap(err, "AMPQ Channel Creation")
 	}
 
-	pub.ch = channel
+	pub.ch = ch
 
 	go pub.closeWithContext(ctx)
 

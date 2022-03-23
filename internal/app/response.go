@@ -10,12 +10,6 @@ import (
 
 // Respond send response to client with provide statusCode and Data.
 func Respond(ctx context.Context, w http.ResponseWriter, data interface{}, statusCode int) error {
-	// Set the status code for the request logger middleware.
-	err := SetStatusCode(ctx, statusCode)
-	if err != nil {
-		return err
-	}
-
 	// If there is nothing to marshal then set status code and return.
 	if statusCode == http.StatusNoContent {
 		w.WriteHeader(statusCode)
