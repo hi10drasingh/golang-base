@@ -25,6 +25,7 @@ func NewHandlers(conf Config) http.Handler {
 		middlewares.CORS(),
 		middlewares.Logger(conf.Deps.Log),
 		middlewares.Errors(conf.Deps.Log),
+		middlewares.RequestLogger(conf.Deps.RequestLog),
 		middlewares.Recovery(conf.Deps.Log),
 	)
 

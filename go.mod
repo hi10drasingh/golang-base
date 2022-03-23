@@ -7,6 +7,7 @@ require github.com/rs/zerolog v1.26.1
 require (
 	github.com/go-playground/validator/v10 v10.10.1
 	github.com/go-sql-driver/mysql v1.6.0
+	github.com/justinas/alice v1.2.0
 	github.com/pkg/errors v0.9.1
 	github.com/rabbitmq/amqp091-go v1.3.0
 	github.com/tsenart/nap v0.0.0-20190313104555-a650a3fbb7be
@@ -21,6 +22,7 @@ require (
 	github.com/klauspost/compress v1.13.6 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/mattn/go-sqlite3 v1.14.12 // indirect
+	github.com/rs/xid v1.3.0 // indirect
 	github.com/xdg-go/pbkdf2 v1.0.0 // indirect
 	github.com/xdg-go/scram v1.0.2 // indirect
 	github.com/xdg-go/stringprep v1.0.2 // indirect
