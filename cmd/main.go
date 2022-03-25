@@ -15,9 +15,11 @@ import (
 )
 
 func main() {
-	logger := drmlog.NewConsoleLogger()
+	var logger drmlog.Logger = drmlog.NewConsoleLogger()
+
+	ctx := logger.GetLogger().WithContext(context.Background())
 	if err := run(); err != nil {
-		logger.Fatal(context.Background(), err, "Main Error")
+		logger.Fatal(ctx, err, "Main Error")
 	}
 }
 

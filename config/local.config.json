@@ -42,12 +42,12 @@
     },
     "rabbitmq": {
         "enabled": true,
+        "heartbeat": "60s",
         "host": "dev1.droom.in",
         "password": "pratdroom1",
         "port": 5672,
         "timeout": "60s",
         "user": "admin",
-        "vhost": "/",
-        "heartbeat": "60s"
+        "vhost": "/"
     }
 }

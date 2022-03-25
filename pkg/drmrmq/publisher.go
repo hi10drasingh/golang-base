@@ -20,30 +20,15 @@ type Publisher struct {
 }
 
 func (rq *RabbitMQ) NewPublisher(ctx context.Context) (*Publisher, error) {
-	pub := &Publisher{
-		rq: rq,
-	}
-
-	if err := pub.channel(ctx); err != nil {
+	channel, err := rq.channel(ctx)
+	if err != nil {
 		return nil, errors.Wrap(err, "Publisher Channel Creation")
 	}
 
-	return pub, nil
-}
-
-func (pub *Publisher) channel(ctx context.Context) error {
-	ch, err := pub.rq.conn.Channel()
-	if err != nil {
-		return errors.Wrap(err, "AMPQ Channel Creation")
-	}
-
-	pub.ch = ch
-
-	go pub.closeWithContext(ctx)
-
-	go pub.startNotifyCancelOrClosed(ctx)
-
-	return nil
+	return &Publisher{
+		rq: rq,
+		ch: channel,
+	}, nil
 }
 
 // Publish will send the provided msg to provided exchange.
@@ -74,38 +59,5 @@ func (pub *Publisher) confirmOne(ctx context.Context, confirms <-chan amqp.Confi
 		pub.rq.log.Infof(ctx, "confirmed delivery with delivery tag: %d", confirmed.DeliveryTag)
 	} else {
 		pub.rq.log.Infof(ctx, "failed delivery of delivery tag: %d", confirmed.DeliveryTag)
-	}
-}
-
-func (pub *Publisher) closeWithContext(ctx context.Context) {
-	<-ctx.Done()
-
-	if err := pub.ch.Close(); err != nil {
-		pub.rq.log.Error(ctx, err, "Publisher Close")
-	}
-}
-
-func (pub *Publisher) startNotifyCancelOrClosed(ctx context.Context) {
-	notifyCloseChan := pub.ch.NotifyClose(make(chan *amqp.Error))
-	notifyCancelChan := pub.ch.NotifyCancel(make(chan string))
-
-	select {
-	case err := <-notifyCloseChan:
-		if err != nil && err.Server {
-			er := pub.channel(ctx)
-			if er != nil {
-				pub.rq.log.Error(ctx, er, "Publisher Channel Reconnect")
-			}
-
-			pub.rq.log.Error(ctx, err, "Publisher Notify Channel Close")
-		}
-
-	case err := <-notifyCancelChan:
-		er := pub.channel(ctx)
-		if er != nil {
-			pub.rq.log.Error(ctx, er, "Publisher Channel Reconnect")
-		}
-
-		pub.rq.log.Error(ctx, errors.New(err), "Publisher Notify Channel Close")
 	}
 }
