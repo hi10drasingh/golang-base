@@ -7,7 +7,6 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/droomlab/drm-coupon/pkg/drmcontext"
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/pkgerrors"
@@ -25,6 +24,7 @@ type Logger interface {
 	Info(ctx context.Context, msg string)
 	Debugf(ctx context.Context, format string, args ...interface{})
 	Debug(ctx context.Context, msg string)
+	GetLogger() *zerolog.Logger
 }
 
 // Config holds configuration for logger.
@@ -35,56 +35,47 @@ type Config struct {
 
 // Log hold logger object.
 type Log struct {
-	Logger zerolog.Logger
+	Logger *zerolog.Logger
 }
 
 func (l *Log) Errorf(ctx context.Context, err error, format string, args ...interface{}) {
-	l.withContext(ctx)
-	l.Logger.Error().Stack().Err(errors.WithStack(err)).Msgf(format, args...)
+	l.withContext(ctx).Error().Stack().Err(errors.WithStack(err)).Msgf(format, args...)
 }
 
 func (l *Log) Error(ctx context.Context, err error, msg string) {
-	l.withContext(ctx)
-	l.Logger.Error().Stack().Err(errors.WithStack(err)).Msg(msg)
+	l.withContext(ctx).Error().Stack().Err(errors.WithStack(err)).Msg(msg)
 }
 
 func (l *Log) Fatalf(ctx context.Context, err error, format string, args ...interface{}) {
-	l.withContext(ctx)
-	l.Logger.Fatal().Stack().Err(errors.WithStack(err)).Msgf(format, args...)
+	l.withContext(ctx).Fatal().Stack().Err(errors.WithStack(err)).Msgf(format, args...)
 }
 
 func (l *Log) Fatal(ctx context.Context, err error, msg string) {
-	l.withContext(ctx)
-	l.Logger.Fatal().Stack().Err(errors.WithStack(err)).Msg(msg)
+	l.withContext(ctx).Fatal().Stack().Err(errors.WithStack(err)).Msg(msg)
 }
 
 func (l *Log) Infof(ctx context.Context, format string, args ...interface{}) {
-	l.withContext(ctx)
-	l.Logger.Info().Msgf(format, args...)
+	l.withContext(ctx).Info().Msgf(format, args...)
 }
 
 func (l *Log) Info(ctx context.Context, msg string) {
-	l.withContext(ctx)
-	l.Logger.Info().Msg(msg)
+	l.withContext(ctx).Info().Msg(msg)
 }
 
 func (l *Log) Debugf(ctx context.Context, format string, args ...interface{}) {
-	l.withContext(ctx)
-	l.Logger.Debug().Msgf(format, args...)
+	l.withContext(ctx).Debug().Msgf(format, args...)
 }
 
 func (l *Log) Debug(ctx context.Context, msg string) {
-	l.withContext(ctx)
-	l.Logger.Debug().Msg(msg)
+	l.withContext(ctx).Debug().Msg(msg)
 }
 
-func (l *Log) withContext(ctx context.Context) {
-	reqIDValue, _ := drmcontext.RequestIDCtx(ctx)
+func (l *Log) GetLogger() *zerolog.Logger {
+	return l.Logger
+}
 
-	// Adding request id
-	if reqIDValue != "" {
-		l.Logger = l.Logger.With().Str(drmcontext.ReqIDKey, reqIDValue).Logger()
-	}
+func (l *Log) withContext(ctx context.Context) *zerolog.Logger {
+	return zerolog.Ctx(ctx)
 }
 
 type levelWriter struct {
@@ -129,7 +120,7 @@ func NewZeroLogger(conf Config) (*Log, error) {
 	logWriter := zerolog.New(lvlWriter).Level(zerolog.Level(conf.Level))
 	logWriter = logWriter.With().Timestamp().Logger()
 
-	return &Log{logWriter}, nil
+	return &Log{&logWriter}, nil
 }
 
 func newLevelWriter(appFile, errFile string) (*levelWriter, error) {
@@ -163,18 +154,5 @@ func NewConsoleLogger() *Log {
 
 	consoleLogger = consoleLogger.Output(zerolog.ConsoleWriter{Out: os.Stderr})
 
-	return &Log{consoleLogger}
-}
-
-func NewRequestLogger(conf Config) (*zerolog.Logger, error) {
-	accessFile := filepath.Clean(conf.Dir + "/access.log")
-
-	accessWriter, err := os.OpenFile(accessFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, rwPerm)
-	if err != nil {
-		return nil, errors.Wrap(err, "Access Log File Open")
-	}
-
-	logger := zerolog.New(accessWriter).Level(zerolog.Level(conf.Level)).With().Timestamp().Logger()
-
-	return &logger, nil
+	return &Log{&consoleLogger}
 }

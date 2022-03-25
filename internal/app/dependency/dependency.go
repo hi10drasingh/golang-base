@@ -9,19 +9,17 @@ import (
 	"github.com/droomlab/drm-coupon/pkg/drmrmq"
 	"github.com/droomlab/drm-coupon/pkg/drmsql"
 	"github.com/pkg/errors"
-	"github.com/rs/zerolog"
 	"github.com/tsenart/nap"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 // Server struct holds all server level dependencies.
 type Dependency struct {
-	Config     *config.App
-	Log        drmlog.Logger
-	SQL        *nap.DB
-	NoSQL      *mongo.Client
-	RMQ        *drmrmq.RabbitMQ
-	RequestLog *zerolog.Logger
+	Config *config.App
+	Log    drmlog.Logger
+	SQL    *nap.DB
+	NoSQL  *mongo.Client
+	RMQ    *drmrmq.RabbitMQ
 }
 
 // Init initialized global dependencies.
@@ -34,11 +32,6 @@ func Init() (*Dependency, error) {
 	log, err := drmlog.NewZeroLogger(conf.Log)
 	if err != nil {
 		return nil, errors.Wrap(err, "Log Initialize")
-	}
-
-	reqLog, err := drmlog.NewRequestLogger(conf.Log)
-	if err != nil {
-		return nil, errors.Wrap(err, "Request Log Initialize")
 	}
 
 	sqldb, err := drmsql.GetDB(&conf.Mysql, log)
@@ -57,12 +50,11 @@ func Init() (*Dependency, error) {
 	}
 
 	return &Dependency{
-		Config:     conf,
-		Log:        log,
-		SQL:        sqldb,
-		NoSQL:      nosqldb,
-		RMQ:        rmq,
-		RequestLog: reqLog,
+		Config: conf,
+		Log:    log,
+		SQL:    sqldb,
+		NoSQL:  nosqldb,
+		RMQ:    rmq,
 	}, nil
 }
 

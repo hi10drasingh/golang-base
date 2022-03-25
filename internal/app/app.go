@@ -7,6 +7,7 @@ import (
 	"syscall"
 
 	"github.com/droomlab/drm-coupon/internal/config"
+	"github.com/droomlab/drm-coupon/pkg/drmcontext"
 	"github.com/droomlab/drm-coupon/pkg/drmlog"
 )
 
@@ -48,7 +49,14 @@ func (a *App) Handle(group, path string, handler Handler, middlewares ...Middlew
 	handler = wrapMiddleware(a.mw, handler)
 
 	baseHandler := func(w http.ResponseWriter, r *http.Request) {
-		ctx := r.Context()
+		// Setting golbal context values
+		ctx := drmcontext.SetValues(r.Context())
+
+		// Update request with new context
+		r = r.WithContext(ctx)
+
+		// Setting request id header
+		SetRequestIDHeader(ctx, w)
 
 		// If panic occurs in app
 		if err := handler(ctx, w, r); err != nil {

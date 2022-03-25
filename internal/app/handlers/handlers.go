@@ -22,7 +22,7 @@ func NewHandlers(conf Config) http.Handler {
 		conf.Shutdown,
 		conf.Deps.Log,
 		conf.Deps.Config,
-		middlewares.RequestLogger(conf.Deps.RequestLog),
+		middlewares.ContextLogger(conf.Deps.Log),
 		middlewares.CORS(),
 		middlewares.Errors(conf.Deps.Log),
 		middlewares.Recovery(conf.Deps.Log),
