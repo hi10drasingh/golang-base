@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net"
+	"sync"
 
 	"github.com/droomlab/drm-coupon/pkg/drmlog"
 	"github.com/droomlab/drm-coupon/pkg/drmtime"
@@ -28,6 +29,7 @@ type RabbitMQ struct {
 	conn      *amqp.Connection
 	rmqConfig *Config
 	log       drmlog.Logger
+	mu        *sync.Mutex
 }
 
 // NewRabbitMQ return new instance of RabbitMQ Struct.
@@ -36,6 +38,7 @@ func NewRabbitMQ(conf *Config, log drmlog.Logger) (*RabbitMQ, error) {
 		conn:      nil,
 		rmqConfig: conf,
 		log:       log,
+		mu:        &sync.Mutex{},
 	}
 
 	if err := rmq.Connect(); err != nil {
@@ -49,6 +52,9 @@ func NewRabbitMQ(conf *Config, log drmlog.Logger) (*RabbitMQ, error) {
 
 // Connect connects to amqp server.
 func (rq *RabbitMQ) Connect() (err error) {
+	rq.mu.Lock()
+	defer rq.mu.Unlock()
+
 	connectionTimeout := rq.rmqConfig.Timeout.Time
 
 	address := fmt.Sprintf("amqp://%s:%s@%s:%d",
@@ -117,5 +123,37 @@ func (rq *RabbitMQ) handleClose() {
 		if err != nil {
 			rq.log.Error(context.Background(), err, "RMQ Connection Reconnect")
 		}
+	}
+}
+
+func (rq *RabbitMQ) channel(ctx context.Context) (*amqp.Channel, error) {
+	channel, err := rq.conn.Channel()
+	if err != nil {
+		return nil, errors.Wrap(err, "AMPQ Channel Creation")
+	}
+
+	go rq.closeWithContext(ctx, channel)
+
+	go rq.startNotifyCancelOrClosed(ctx, channel)
+
+	return channel, nil
+}
+
+func (rq *RabbitMQ) closeWithContext(ctx context.Context, channel *amqp.Channel) {
+	<-ctx.Done()
+
+	channel.Close()
+}
+
+func (rq *RabbitMQ) startNotifyCancelOrClosed(ctx context.Context, channel *amqp.Channel) {
+	notifyCloseChan := channel.NotifyClose(make(chan *amqp.Error))
+	notifyCancelChan := channel.NotifyCancel(make(chan string))
+
+	select {
+	case err := <-notifyCloseChan:
+		rq.log.Error(ctx, err, "Notify Channel Close")
+
+	case err := <-notifyCancelChan:
+		rq.log.Error(ctx, errors.New(err), " Notify Channel Cancel")
 	}
 }

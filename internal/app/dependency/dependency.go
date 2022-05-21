@@ -44,7 +44,12 @@ func Init() (*Dependency, error) {
 		return nil, errors.Wrap(err, "NoSQL DB Initialize")
 	}
 
-	rmq, err := drmrmq.NewRabbitMQ(&conf.RabbitMQ, log)
+	rmqlog, err := drmlog.NewRMQLogger(conf.Log)
+	if err != nil {
+		return nil, errors.Wrap(err, "RMQLog Initialize")
+	}
+
+	rmq, err := drmrmq.NewRabbitMQ(&conf.RabbitMQ, rmqlog)
 	if err != nil {
 		return nil, errors.Wrap(err, "RabbitMQ Initialize")
 	}

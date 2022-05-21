@@ -12,7 +12,7 @@ import (
 	"github.com/rs/zerolog/pkgerrors"
 )
 
-const rwPerm = 0o644
+const rwPerm = 420
 
 // Logger provides interface for logging library.
 type Logger interface {
@@ -149,10 +149,24 @@ func NewServerLogger(logger Logger) *glog.Logger {
 	return glog.New(&errorWriter{logger}, "" /* prefix */, 0 /* flags */)
 }
 
+// NewConsoleLogger write log msg to consolw with colorful output.
 func NewConsoleLogger() *Log {
 	consoleLogger := zerolog.New(os.Stderr).With().Timestamp().Logger()
 
 	consoleLogger = consoleLogger.Output(zerolog.ConsoleWriter{Out: os.Stderr})
 
 	return &Log{&consoleLogger}
+}
+
+// NewRMQLogger will write to rmqlog and error log.
+func NewRMQLogger(conf Config) (*Log, error) {
+	lvlWriter, err := newLevelWriter(conf.Dir+"/rmqlog.log", conf.Dir+"/error.log")
+	if err != nil {
+		return nil, errors.Wrap(err, "New LevelWriter")
+	}
+
+	logWriter := zerolog.New(lvlWriter).Level(zerolog.Level(conf.Level))
+	logWriter = logWriter.With().Timestamp().Logger()
+
+	return &Log{&logWriter}, nil
 }
