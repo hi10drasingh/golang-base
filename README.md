@@ -32,6 +32,15 @@ This is a comprehensive Golang HTTP boilerplate project that provides a foundati
 	- Panic Recovery Middleware: Recover from unexpected panics and prevent application crashes.
 	- Request Logging Middleware: Log incoming requests and outgoing responses for analysis and auditing.
 
+## Requirement
+
+Before you proceed, please make sure your machine has met the following requirements:
+
+| Dependency |   Version   |
+| ---------- | :---------: |
+| Go       | >= v1.17 |
+
+
 ## Getting Started
 - Clone this repository:
 ```sh
