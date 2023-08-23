@@ -1,4 +1,4 @@
-module github.com/droomlab/drm-coupon
+module github.com/droomlab/golang-base
 
 go 1.17
 
