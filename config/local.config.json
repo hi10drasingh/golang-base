@@ -16,7 +16,7 @@
     "mongo": {
         "authSource": "admin",
         "connectionTimeout": "30s",
-        "db": "droom_new",
+        "db": "db",
         "hosts": ["localhost:27017"],
         "password": "root",
         "user": "root"
