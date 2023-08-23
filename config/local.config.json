@@ -17,24 +17,24 @@
         "authSource": "admin",
         "connectionTimeout": "30s",
         "db": "droom_new",
-        "hosts": ["dev1.droom.in:27017"],
-        "password": "profsnapeisdon",
+        "hosts": ["localhost:27017"],
+        "password": "root",
         "user": "root"
     },
     "mysql": {
         "connectionTimeout": "1s",
         "servers": [
             {
-                "db": "cscart_new",
-                "host": "dev1.droom.in",
-                "password": "profsnapeisdon",
+                "db": "db",
+                "host": "localhost",
+                "password": "root",
                 "port": 3306,
                 "user": "root"
             },
             {
-                "db": "cscart_new",
-                "host": "dev1.droom.in",
-                "password": "profsnapeisdon",
+                "db": "db",
+                "host": "localhost",
+                "password": "root",
                 "port": 3306,
                 "user": "root"
             }
@@ -43,11 +43,11 @@
     "rabbitmq": {
         "enabled": true,
         "heartbeat": "60s",
-        "host": "dev1.droom.in",
-        "password": "pratdroom1",
+        "host": "localhost",
+        "password": "guest",
         "port": 5672,
         "timeout": "60s",
-        "user": "admin",
+        "user": "guest",
         "vhost": "/"
     }
 }
